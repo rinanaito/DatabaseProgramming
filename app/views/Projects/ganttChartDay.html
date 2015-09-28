@@ -1,0 +1,111 @@
+%{
+widthTable=0;
+if (project.duration!=null)widthTable=22*project.duration;
+widthTable++;}%
+<table cellpadding="0" cellspacing="0" style="width: ${widthTable}px;">
+    <thead>
+    <tr id="monthName">
+    #{list items:months,as:'month'}
+        <th colspan="${month.merge}">#{if month.merge>=7}${month.name}#{/if}
+                                #{elseif month.merge>=3}${controllers.Functions.monthNameShort[month.month]}#{/elseif}
+                            #{else }${month.month+1}#{/else}</th>
+    #{/list}
+    </tr>
+    <tr>
+    #{list items:days,as:'day'}
+        <th class="${day.weekend?'weekend':''}">${day.day}</th>
+    #{/list}
+    </tr>
+    <tr id="dayName">
+    #{list items:days,as:'day'}
+        <th class="${day.weekend?'weekend':''}">${day.dayName}</th>
+    #{/list}
+    </tr>
+    </thead>
+    <tbody>
+    %{count=1;}%
+    <tr id=p-${project.id} class="project ${count%2==0?'even':'odd'}">
+    #{list items:days,as:'day'}
+    %{
+        rangeVal=controllers.Functions.startFinishDateRange(project.startDate,project.finishDate,day.date);
+        if(rangeVal==1){}%
+        <td class=selected colspan="${project.duration}">
+            <div title="${project.name}">&nbsp;</div>
+        </td>
+    %{}else if(rangeVal==0){}%
+        <td class="${day.weekend?'weekend':''}">&nbsp;</td>
+    %{}}%
+    #{/list}
+    </tr>
+    %{count++;}%
+    #{list items:projectObjects,as:'object'}
+    <tr id=o-${object.id} class="object ${count%2==0?'even':'odd'}">
+        #{list items:days,as:'day'}
+        %{
+            rangeVal=controllers.Functions.startFinishDateRange(object.startDate,object.finishDate,day.date);
+            if(rangeVal==1){}%
+            <td class=selected colspan="${object.duration}">
+                <div title="${object.name}">&nbsp;</div>
+            </td>
+        %{}else if(rangeVal==0){}%
+            <td class="${day.weekend?'weekend':''}">&nbsp;</td>
+        %{}}%
+        #{/list}
+    </tr>
+    %{count++}%
+        #{list items:object.taskGroups,as:'taskGroup'}
+        <tr id=g-${taskGroup.id} class="taskGroup ${count%2==0?'even':'odd'}">
+            #{list items:days,as:'day'}
+            %{
+                rangeVal=controllers.Functions.startFinishDateRange(taskGroup.startDate,taskGroup.finishDate,day.date);
+                if(rangeVal==1){}%
+                <td class=selected colspan="${taskGroup.duration}">
+                    <div title="${taskGroup.name}">&nbsp;</div>
+                </td>
+            %{}else if(rangeVal==0){}%
+                <td class="${day.weekend?'weekend':''}">&nbsp;</td>
+            %{}}%
+            #{/list}
+        </tr>
+        %{count++}%
+            #{list items:taskGroup.tasks,as:'task'}
+            <tr id=t-${task.id} class="task ${count%2==0?'even':'odd'}">
+                #{list items:days,as:'day'}
+                %{
+                    rangeVal=controllers.Functions.startFinishDateRange(task.startDate,task.finishDate,day.date);
+                    if(rangeVal==1){}%
+                    <td class=selected colspan="${task.duration}">
+                        <div title="${task.name}">&nbsp;</div>
+                    </td>
+                %{}else if(rangeVal==0){}%
+                    <td class="${day.weekend?'weekend':''}">&nbsp;</td>
+                %{}}%
+                #{/list}
+            </tr>
+            %{count++}%
+                #{list items:object.floors,as:'floor'}
+                <tr id=f-${task.id}-${floor.id} class="floor ${count%2==0?'even':'odd'}">
+                %{
+                    taskFloorRel=task.getRel(floor.id);
+                    if(taskFloorRel!=null){
+                    for(controllers.MyClass.MyDay day:days){
+                    rangeVal=controllers.Functions.startFinishDateRange(taskFloorRel.startDate,taskFloorRel.finishDate,day.date);
+                    if(rangeVal==1){}%
+                    <td class=selected colspan="${taskFloorRel.duration}">
+                        <div title="${taskFloorRel.task.name} - ${taskFloorRel.floor.name}">&nbsp;</div>
+                    </td>
+                %{}else if(rangeVal==0){}%
+                    <td class="${day.weekend?'weekend':''}">&nbsp;</td>
+                %{}}
+                    }else{}%
+                    #{list items:days,as:'day'}
+                        <td class="${day.weekend?'weekend':''}">&nbsp;</td>
+                    #{/list}
+                %{};count++}%
+                </tr>
+                #{/list}
+            #{/list}
+        #{/list}
+    #{/list}
+    </tbody>
+</table>

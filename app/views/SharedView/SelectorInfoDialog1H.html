@@ -1,0 +1,72 @@
+<div id="selector-info1H" style="display:none;width: auto;"><img src="&{'/public/images/ajax-loader-h.gif'}"
+                                                               id="loadingSelectInfoImage1H"></div>
+
+<script type="text/javascript">
+    var loadingSelectInfoImage1H =
+    #{jsAction @FunctionController.getSelectorInfo(":id",":type") /}
+    var loadSelectorRequest1H;
+
+    function loadSelectorInfo1H(id, type) {
+        removeSelectorLoading1H();
+        loadSelectorRequest1H = $.post(loadingSelectInfoImage1H({id:id, type:type}), function(data) {
+            $("img#loadingSelectInfoImage1H").hide();
+            $("div#selector-info1H").append(data);
+        });
+    }
+    function cancelSelectorInfo1H() {
+        loadSelectorRequest1H.abort();
+        removeSelectorLoading1H();
+    }
+    function removeSelectorLoading1H() {
+        $("div#selector-info1H").find("table#selector-info-table").remove();
+        $("img#loadingSelectInfoImage1H").show();
+    }
+</script>
+
+<style type="text/css">
+    table td a.selectInfoView1H {
+        text-decoration: none;
+        color: #000000;
+    }
+    div#selector-info1H > img {
+        margin-left: 15px;
+        margin-top: 10px;
+    }
+
+    div#selector-info1H {
+        background: #ffffff;
+        box-shadow: 0 0 18px black;
+        border: 1px solid #dcdcdc;
+        border-radius: 8px;
+        position: absolute;
+        width: 240px;
+        height: auto;
+        min-height: 30px;
+        color: #000000;
+        z-index: 1250
+    }
+
+    div#selector-info1H > img {
+        margin-left: 15px;
+        margin-top: 10px;
+    }
+
+    table#selector-info-table {
+        border-style: none !important;
+    }
+
+    table#selector-info-table tr {
+        line-height: 10px !important;
+    }
+
+    table#selector-info-table td {
+        border-bottom: none !important;
+        font-size: 12px;
+        color: #808080;
+    }
+
+    table#selector-info-table td#header span#name {
+        font-weight: bold;
+        color: #000000;
+    }
+</style>

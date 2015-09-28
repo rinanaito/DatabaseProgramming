@@ -1,0 +1,287 @@
+<div class="row">
+    <div class="col-md-12">
+        <table id="item-details-table"
+               style="width:100%;font-family: Arial; text-align: left;"
+               border="0"
+               cellpadding="0" cellspacing="0">
+            <thead>
+            <tr>
+                <td class="td"
+                    style="background-color: black; color: white; height: 34px; width: 70%; border: solid black 1px">
+                &{'Daalgavar'}
+                </td>
+                <td style="width: 30%; border: solid black 1px">
+                    <span class="td" style="margin-left: 3%; margin-right: 2%;">
+                        Punch List Item No:</span>
+                    <span>${item.No}</span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <span class="td">&{'Subject'}:</span>
+                    <span>${item.name}</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="td">&{'DrawingNumber'}:</span>
+                    <span></span>
+                </td>
+                <td>
+                    <span class="td">&{'ScheduleImpact'}:</span>
+                    <span>&{item.scheduleImpact.impact}</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="td">&{'Location'}:</span>
+                    <span>${item.location}</span>
+                </td>
+                <td>
+                    <span class="td">&{'CostImpact'}:</span>
+                    <span>&{item.costImpact.impact}</span>
+                </td>
+            </tr>
+            <tr style="border-bottom: none">
+                <td>
+                    <span class="td">&{'Reference'}:</span>
+                    <span>${item.reference}</span>
+                </td>
+                <td>
+                    <span class="td">&{'Priority'}:</span>
+                    <span>&{item.priority.priority}</span>
+                </td>
+            </tr>
+            </thead>
+        #{if item.drawing_pins != null}
+            <tbody>
+            <tr style="min-height: 60px; max-height: 130px; overflow: hidden;"
+                valign="middle" cellpadding="0"
+                cellspacing="0">
+                <td colspan="5" style="padding-bottom: 8px">
+                            <span class="td" style="margin-top: 16px; height: 100%; float: left">
+                        &{'DrawingPins'}:</span>
+                    #{list items:item.drawing_pins, as:'dpin'}
+                        #{if dpin.drawing != null}
+                            <div class="btn btn-default drewImg" title="${dpin.drawing.name}"
+                                 onclick="editDrawing(this)"
+                                 style="vertical-align: middle; width: 100px; height: 100px; background: url('${dpin.drawing.dir + "." + dpin.drawing.extension}') no-repeat center; background-size: 100px 100px; margin-right: 5px;">
+                                <span class="dhidden">1</span>
+                                <input type="hidden" name="drawingType" class="drawingType"
+                                       value="drawing"/>
+                                <input type="hidden" name="drawingPin" class="drawingPin"
+                                       value="${dpin.getJson()}"/>
+                                <input type="hidden" name="drawingId" class="drawingId"
+                                       value="${dpin.drawing.id}"/>
+                                <img class="dhidden"
+                                     src="${dpin.drawing.dir + "." + dpin.drawing.extension}"/>
+                            </div>
+                        #{/if}
+                        #{else}
+                            <div class="btn btn-default drewImg" title="${dpin.punchListAttachDrawing.name}"
+                                 onclick="editDrawing(this)"
+                                 style="vertical-align: middle; width: 100px; height: 100px; background: url('${dpin.rfiAttachDrawing.dir + "." + dpin.rfiAttachDrawing.extension}') no-repeat center; background-size: 100px 100px; margin-right: 5px;">
+                                <span class="dhidden">1</span>
+                                <input type="hidden" name="drawingType" class="drawingType"
+                                       value="attach"/>
+                                <input type="hidden" name="drawingPin" class="drawingPin"
+                                       value="${dpin.getJson()}"/>
+                                <input type="hidden" name="drawingId" class="drawingId"
+                                       value="${dpin.punchListAttachDrawing.id}"/>
+                                <img class="dhidden"
+                                     src="${dpin.punchListAttachDrawing.dir + "." + dpin.punchListAttachDrawing.extension}"/>
+                            </div>
+                        #{/else}
+                    #{/list}
+                </td>
+            </tr>
+            </tbody>
+        #{/if}
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <table id="question-table" border="0"
+               style="width: 100%; font-family: Arial; text-align: left;"
+               cellpadding="0" cellspacing="0">
+            <thead style="border: solid #000000 1px;">
+            <tr>
+                <td class="td" colspan="2" style="width: 60%">
+                &{'Description'}:
+                </td>
+                <td class="align-right">
+                    <span class="td" style="width: 40%">&{'DueDate'}:</span>
+                    <span>${item.dueDate.format("yyyy-MM-dd")}</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-left: 2%;padding-right: 2%" colspan="3">
+                    <span>${item.description.raw()}</span>
+                </td>
+            </tr>
+            </thead>
+        #{if item.attaches.size()}
+            <tr style="max-height: 100px; overflow: hidden;">
+                <td colspan="3">
+                    <table border="0" cellspacing="0" cellpadding="0"
+                           style="width:100%">
+                        <tr>
+                            <td style="width: 12%" class="td">
+                                <span>&{'Attachments'}</span>
+                            </td>
+                            <td id="task-attaches" style="width: 88%; padding-bottom: 5px;">
+                                #{list items:item.attaches, as:'attach'}
+                                    <div class="post-images align-center"
+                                         style="float:left;">
+                                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension).raw()}
+                                    </div>
+                                #{/list}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        #{/if}
+        #{else}
+            <tr>
+                <td style="padding-top: 18px;"></td>
+            </tr>
+        #{/else}
+        #{if item.punchList_replies.size()}
+            <tr>
+                <td colspan="3">
+                    #{list items:item.punchList_replies, as:'reply'}
+                        <table id="question-table" border="0"
+                               style="${reply.author.id == item.punchList.assignee.id ?'margin-left: 5%; width: 95%;' : 'width: 100%;'} font-family: Arial; text-align: left;"
+                               cellpadding="0" cellspacing="0">
+                            <tbody style="border: solid #000000 1px;">
+                            <tr>
+                                <td colspan="3">
+                    <span class="td">
+                        #{if reply.replyMod.modName == "Resolve"}
+                        &{'Reply-Resolve'}:
+                        #{/if}
+                        #{else }
+                            #{if reply.replyMod.modName == "Cancel"}
+                            &{'Reply-Cancel'}:
+                            #{/if}
+                            #{else }
+                            &{'Reply'}:
+                            #{/else}
+                        #{/else}
+                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding-left: 2%;padding-right: 2%" colspan="3">
+                                ${reply.response.raw()}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: ${reply.author.id == item.punchList.assignee.id ? "25": "30"}%">
+                                    <span class="td">&{'Date'}:</span>
+                                ${reply.createDate.format("yy-MM-dd")}
+                                </td>
+                                <td style="width: 40%">
+                    <span class="td">
+                        &{'RepliedBy'}:
+                    </span>
+                                ${reply.author.getLastnameFirstCharacter()}. ${reply.author.firstName}
+                                </td>
+                                <td style="width: 30%">
+                                    <span class="td">&{'Position'}:</span>
+                                ${reply.author.userPosition.name}
+                                </td>
+                            </tr>
+                            </tbody>
+                            #{if reply.punchList_reply_attaches.size()}
+                                <tr style="min-height: 60px; max-height: 130px; overflow: hidden;">
+                                    <td colspan="3">
+                                        <table border="0" cellspacing="0" cellpadding="0"
+                                               style="width:100%;margin: 0">
+                                            <tr style="margin: 0">
+                                                <td style="width: 12%" class="td">
+                                                    <span>&{'Attachments'}:</span>
+                                                </td>
+                                                <td id="task-attaches" style="width: 88%;padding-bottom: 5px">
+                                                    #{list items:reply.punchList_reply_attaches, as:'attach'}
+                                                        <div class="post-images align-center"
+                                                             style="float:left;">
+                                                        ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension).raw()}
+                                                        </div>
+                                                    #{/list}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            #{/if}
+                            #{else}
+                                <tr>
+                                    <td style="padding-top: 36px;"></td>
+                                </tr>
+                            #{/else}
+                        </table>
+                    #{/list}
+                </td>
+            </tr>
+        #{/if}
+        </table>
+    </div>
+</div>
+#{if item.punchList.punchList_status.status == "Open" && (item.punchList.questionReceivedFrom.id == user.id || item.punchList.assignee.id == user.id) && key == "on"}
+<div class="row">
+    <div class="col-md-12" style="padding-top: 2%;">
+        <form id="replyField" action="@{PunchLists.reply()}" method="post">
+            <table cellpadding="0" cellspacing="0" border="0" style="width:100%;">
+                <thead>
+                <tr>
+                    <td>
+                        <button disabled class="btn btn-dark btn-transparent"
+                                style="text-align: left; color: black; width:100%">
+                        &{'writeReply'}<i class="fa fa-angle-double-down" style="float:right; "></i>
+                        </button>
+                        <input type="hidden" name="id" id="replyid" value="${item.id}"/>
+                        <input type="hidden" id="checkbox" name="isResolve" value="${item.isResolve ? "1": "0"}"/>
+                    </td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <textarea name="response" id="replytext" rows="5" style="width: 100%"></textarea>
+                    </td>
+                </tr>
+                <tr valign="middle">
+                    <td>
+                        <div style="float: left">
+                            #{include "SharedView/Attachs.html"/}
+                            <div id="attaches"></div>
+                        </div>
+                        <button style="float: right;" type="button" id="send"
+                                onclick="${item.isResolve ? (item.punchList.questionReceivedFrom.id == user.id ? "cancelop()" : "formSubmit()"): (item.punchList.assignee.id == user.id ? "op()" : "formSubmit()")}"
+                                class="btn btn-danger btn-transparent">&{'Send'}</button>
+                        <button style="float: right; margin-right: 2%" id="formClear" type="reset"
+                                class="btn btn-default btn-transparent">
+                        &{'Clear'}
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding-top: 2%;">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+#{/if}
+<script>
+    $("button#formClear").click(function () {
+        $("div#attachContainer ul#uploadBox").html("<li><span><span></span></span></li>");
+    });
+</script>
+#{ImgThumbnail div:'div.post-images'/}
+#{AttachScript uploadPath:controllers.Consts.uploadPunchListAttachPath /}

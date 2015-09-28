@@ -1,0 +1,791 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'PunchList'/}
+#{set activeMenuSub:'PunchListnew'/}
+#{jqueryui-config /}
+#{fileupload-config /}
+#{checkFileExtension /}
+<script src="/assets/plugins/currentset/d3.js" type="text/javascript"></script>
+
+<div id="main-content" style="font-weight: 500;">
+    <div class="page-title">
+        <h3 style="float: left">&{'CreateNew'}</h3>
+        <a href="@{PunchLists.back(temp, tempId)}" style="float: right">
+            <i class="fa fa-angle-left"></i> <span>&{'Back'}</span>
+        </a>
+        <br>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="background-color: white; margin-left: 1%; width: 98%">
+            <form id="form" action="@{PunchLists.create()}" method="post" style="font-size: 14px!important;"
+                  enctype="multipart/form-data">
+                <input type="hidden" name="temp" value="${temp}">
+                <input type="hidden" name="tempId" value="${tempId}">
+
+                <div class="row" style="padding-top: 1%;">
+                    <div class="col-md-8 post-column-left">
+                        <div class="form-group">
+                            <label style="width: 20%;">&{'Subject'}</label>
+                            <input type="text" class="form-control f-18" style="width: 79%;"
+                                   name="name" id="subject" value="${subject != "" ? subject : ""}"/>
+                        </div>
+                        <div class="form-group">
+                            <label style="width: 20%;">&{'Task'} #</label>
+                            <input type="hidden" name="task" id="taskNo" value="${taskId != 0 ? taskId : ""}"/>
+                            <button type="button" class="btn btn-effect btn-default" style="width: 300px"
+                                    data-toggle="modal" data-target="#divSelTask"
+                                    id="selectChooseTaskButton">${task ? task.name : 'Сонгох'}
+                            </button>
+                        </div>
+                        <div class="form-group">
+                            <label style="width: 50%;">
+                                <input type="checkbox"
+                                       name="private_"/><span style="margin-left: 4px">&{'Private'}</span>
+                            </label>
+
+                            <div style="width: 50%;"></div>
+                        </div>
+                        <input type="hidden" id="draft" name="draft" value=""/>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="post-column-right" style="overflow: visible; padding-top: 8px;">
+                            <div class="form-group">
+                                <div style="margin-bottom: 12px; padding-left: 25px">
+                                &{'AssignedTo'}<span class="asterisk">*</span>
+                                </div>
+
+                                <select class="impact form-control" title="&{'SelectAPerson'}" id="assignedTo"
+                                        name="assignedTo">
+                                    <option></option>
+                                #{list items:users, as:'usr'}
+                                    #{if usr.id != user.id}
+                                        <option value="${usr.id}" ${usr.id == assigneeId ? 'selected' :''}>
+                                        ${usr.getLastnameFirstCharacter()}. ${usr.firstName}
+                                        </option>
+                                    #{/if}
+                                #{/list}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <div id="sendUserTag"></div>
+                                <button style="width: 100%; margin-top: -2px;" type="button"
+                                        class="btn btn-effect btn-default" data-toggle="modal"
+                                        data-target="#modal-select"
+                                        id="selectSendUserButton" style="padding-left: 25px">&{'Distribution'}</button>
+                                <input type="hidden" name="distribution" id="distribution" value=""/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="post-review" cellpadding="0" cellspacing="0" class="table table-tools">
+                            <thead>
+                            <tr>
+                                <th>
+                                    <span style="margin-top: 8px; float: left">&{'Daalgavar'}</span>
+                                    <button type="button" class="btn btn-effect btn-danger" onclick="showNewModal()"
+                                            style="float: right;"><i
+                                            class="fa fa-plus p-r-10"></i>&{'AddDaalgavar'}</button>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <table id="post-review" cellpadding="0" cellspacing="0"
+                                       class="table table-tools table-hover task-list">
+                                    <thead>
+                                    <tr>
+                                        <td id="id" class="text-center" style="width: 20px">#</td>
+                                        <td>
+                                        &{'Subject'}
+                                        </td>
+                                        <td style="width: 190px;">
+                                        &{'DueDate'}
+                                        </td>
+                                        <td style="width: 190px;">
+                                        &{'ScheduleImpact'}
+                                        </td>
+                                        <td style="width: 190px;">
+                                        &{'CostImpact'}
+                                        </td>
+                                        <td style="width: 190px;">
+                                        &{'Priority'}
+                                        </td>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    #{if temp == "report" || temp == "dailylog"}
+                                    %{date = new Date();}%
+                                    <tr title="closePanel" onclick="editTask(this)">
+                                        <td><span>1</span>
+                                            <div class="dhidden">
+                                                <input type="text" name="taskId" value="1">
+                                                <input type="text" name="taskSubject" value="${subject}">
+                                                <input type="text" name="taskDueDate" value="${date.format("yyyy-MM-dd")}">
+                                                <input type="text" name="taskLocation" value="">
+                                                <input type="text" name="taskReference" value="">
+                                                <input type="text" name="taskSchedule" value="No">
+                                                <input type="text" name="taskCost" value="No">
+                                                <input type="text" name="taskPriority" value="Low">
+                                                <input type="text" name="taskDesc"
+                                                       value="<p><em>${tag}</em></p><hr/><p></p>">
+
+                                                <div id="att"></div>
+                                                <input type="text" name="attcount" value="0">
+
+                                                <div id="dra">
+                                                </div>
+                                                <input type="text" name="drawcount" value="0"></div>
+                                        </td>
+                                        <td>${subject}</td>
+                                        <td>${date.format("yyyy-MM-dd")}</td>
+                                        <td>Үгүй</td>
+                                        <td>Үгүй</td>
+                                        <td>Бага</td>
+                                    </tr>
+                                    #{/if}
+                                    #{else}
+                                    <tr title="&{'AddDaalgavar'}" onclick="showNewModal()">
+                                        <td>1</td>
+                                        <td>
+                                            <input type="text" disabled class="form-control"/>
+                                        </td>
+                                        <td>
+                                            <input type="text" disabled class="form-control"/>
+                                        </td>
+                                        <td>
+                                            <input type="text" disabled class="form-control"/>
+                                        </td>
+                                        <td>
+                                            <input type="text" disabled class="form-control"/>
+                                        </td>
+                                        <td>
+                                            <input type="text" disabled class="form-control"/>
+                                        </td>
+                                    </tr>
+                                    #{/else}
+                                    </tbody>
+                                </table>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 m-t-20 m-b-40 align-center">
+            <a href="@{PunchLists.back(temp, tempId)}" class="btn btn-default m-r-10 m-t-10">
+                <i class="fa fa-reply"></i>&{'Cancel'}
+            </a>
+        #{if temp == ""}
+            <button type="button" id="draft-submit" class="btn btn-default m-r-10 m-t-10">
+                <i class="fa fa-edit"></i>&{'SaveAsDraft'}
+            </button>
+        #{/if}
+            <button type="button" id="open-submit" class="btn btn-success m-t-10">
+                <i class="fa fa-check"></i>&{'Send'}
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="task" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><strong style="margin-left: 50px">&{'AddDaalgavar'}</strong></h4>
+            </div>
+            <div class="modal-body" style="padding-bottom: 0!important; padding-top: 0!important;">
+                <form id="addtask" action="" method="get">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="tab1" class="col-md-7 post-column-left" style="padding-top: 15px;">
+                                <table id="daalgavar" cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
+                                    <tr>
+                                        <td style="width: 20%;">
+                                            <label>&{'Subject'}</label>
+                                        </td>
+                                        <td style="width: 80%;">
+                                            <input type="text" class="form-control f-18"
+                                                   id="tasksubject"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 20%;">
+                                            <label>&{'DueDate'}</label>
+                                        </td>
+                                        <td style="width: 80%;">
+                                            <input id="taskdueDate" readonly class="form-control" type="text"
+                                                   placeholder="Өдрөө сонгоно уу..."
+                                                   style="width: 50%;font-size: 14px!important; cursor: pointer"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 20%;">
+                                            <label>&{'Location'}</label>
+                                        </td>
+                                        <td style="width: 80%;">
+                                            <input type="text" class="form-control f-18"
+                                                   id="tasklocation"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 20%;">
+                                            <label>&{'Reference'}</label>
+                                        </td>
+                                        <td style="width: 80%;">
+                                            <input type="text" class="form-control f-18"
+                                                   id="taskreference"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <label>&{'DrawingPins'}</label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <div style="float: left" id="drawingList">
+
+                                            </div>
+                                            <button style="float: left; width: 100px; height: 100px;" type="button"
+                                                    class="btn btn-effect btn-default"
+                                                    id="Drawings" onclick="viewGallery()"><i
+                                                    class="fa fa-plus f-18"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div id="tab2" class="col-md-5">
+                                <div class="post-column-right" style="overflow: visible; padding-top: 8px;">
+                                    <div class="form-group">
+                                        <div style="margin-bottom: 12px; padding-left: 25px">
+                                        &{'ScheduleImpact'}
+                                        </div>
+                                        <select id="taskschedule" class="impact form-control">
+                                            <option value="Unknown">&{'Unknown'}</option>
+                                            <option value="Yes">&{'Yes'}</option>
+                                            <option value="No" selected>&{'No'}</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <div style="margin-bottom: 12px; padding-left: 25px">
+                                        &{'CostImpact'}
+                                        </div>
+                                        <select id="taskcost" class="impact form-control">
+                                            <option value="Unknown">&{'Unknown'}</option>
+                                            <option value="Yes">&{'Yes'}</option>
+                                            <option value="No" selected>&{'No'}</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <div style="margin-bottom: 12px; padding-left: 25px">
+                                        &{'Priority'}
+                                        </div>
+                                        <select class="impact form-control" id="taskpriority">
+                                            <option value="Low">&{'Low'}</option>
+                                            <option value="Medium">&{'Medium'}</option>
+                                            <option value="High">&{'High'}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table id="post-review" class="table table-tools table-hover"
+                                   style="padding-bottom: 0px!important;">
+                                <tbody>
+                                <tr>
+                                    <th>
+                                    &{'Description'}
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td class="question">
+                                            <textarea id="editor1" class="cke-editor">
+                                            </textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                    &{'Attachments'}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                    #{include "SharedView/AttachFile.html"/}
+                                        <div id="attachs"></div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div id="remover">
+                    <button style="float: left" type="button" class="btn btn-default"
+                            data-dismiss="modal">&{'Close'}</button>
+                </div>
+                <div id="saver">
+                    <button type="button" class="btn btn-success" onclick="addTask()">&{'Add'}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="file-uploader-demo1"
+     style="visibility:hidden;height:0;width:0">
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        jQuery('#taskdueDate').datetimepicker({lang: 'mn', timepicker: false, format: "Y-m-d"});
+        createUploader();
+    });
+    var attachmentMaxCount = 20, selectedUbox = "";
+    function createUploader() {
+        var src = "";
+        var uploader = new qq.FileUploader({
+            element: document.getElementById('file-uploader-demo1'),
+            action: '@{FileUploader.uploadFile}',
+            onSubmit: function (id, fileName) {
+                uploader.setParams({
+                    uploadPath: '${controllers.Consts.uploadPunchListAttachPath}',
+                    filename: fileName
+                });
+                if (selectedUbox != "fileAttach") {
+                    $("#uploadModal").modal('show');
+                    $("#uploadModal").find(".modal-body").append('<div class="row" style="border-bottom: solid #696969 1px;"><div class="col-md-12"><div class="col-md-10">' + fileName + '</div>' +
+                    '<div class="col-md-2"><i class="fa fa-spinner faa-spin animated"></i></div></div></div>');
+                }
+
+            },
+            onProgress: function (id, fileName, loaded, total) {
+                if (selectedUbox == "fileAttach") {
+                    var li = $('div#attachContainer #uploadBox li:last span span');
+                    li.text(parseInt(loaded * 100 / total) + "%");
+                } else {
+                }
+            },
+            onComplete: function (id, fileName, responseJSON) {
+                if (selectedUbox == "fileAttach") {
+                    if (responseJSON['success'] == true) {
+                        var attachWhichUpload = $('div#attachContainer #uploadBox li:last');
+                        var li = attachWhichUpload.find('span'),
+                                fileDir = responseJSON['filedir'],
+                                fileName = responseJSON['filename'],
+                                extension = responseJSON['extension'];
+                        if (li.length > 0) {
+                            var ext = checkFileExtension(extension),
+                                    imgHtml = "<img src='#src' class='imgIcon' fileDir='#fileDir' fileName='#fileName' extension='#extension'/>";
+                            if (ext == imageFile)imgHtml = imgHtml.replace("#src", fileDir + "t.jpg");
+                            else if (ext == pdfFile) imgHtml = imgHtml.replace("#src", pdfFileIcon);
+                            else if (ext == wordFile) imgHtml = imgHtml.replace("#src", wordFileIcon);
+                            else if (ext == excelFile) imgHtml = imgHtml.replace("#src", excelFileIcon);
+                            else if (ext == videoFile) imgHtml = imgHtml.replace("#src", videoFileIcon);
+                            else if (ext == powerPointFile) imgHtml = imgHtml.replace("#src", powerPointFileIcon);
+                            else if (ext == cadFile) imgHtml = imgHtml.replace("#src", autoCadFileIcon);
+                            else if (ext == viewableVideoFile) imgHtml = imgHtml.replace("#src", viewableVideoIcon);
+                            else if (ext == otherFile) imgHtml = imgHtml.replace("#src", otherFileIcon);
+                            imgHtml = imgHtml.replace("#fileDir", fileDir).replace("#fileName", fileName).replace("#extension", extension);
+                            li.html(imgHtml + $("#deleteImageTemplate").html().replace('#fileDir', fileDir).replace("#extension", extension));
+                            if ($("div#attachContainer #uploadBox li").length < attachmentMaxCount)
+                                $('div#attachContainer #uploadBox').append($("div#documentImageTemplate").html());
+                        }
+                    }
+                }
+                else {
+                    if (responseJSON['success'] == true) {
+                        var fileDir = responseJSON['filedir'],
+                                fileName = responseJSON['filename'],
+                                extension = responseJSON['extension'];
+                        src = "" + fileDir + "." + extension;
+                        $.ajax({
+                            type: "POST",
+                            data: {
+                                filename: fileName,
+                                filedir: fileDir,
+                                extension: extension
+                            },
+                            url: "/punchListattachajax"
+                        }).success(function (data) {
+                            $("#imgDraw").find("input#name").val(fileName);
+                            $("#imgDraw").find("input#listId").val(0);
+                            $("#imgDraw").find("input#type").val("attach");
+                            $("#imgDraw").find("input#pin").val("[]");
+                            $("#imgDraw").find("input#id").val(data);
+                            $("img.img").attr("src", src);
+                            addDrawing();
+                            setTimeout(function () {
+                                $("#uploadModal").find(".modal-body").find("div.row").find("i").attr("class", "fa fa-check");
+                                $("#uploadModal").find(".modal-body").find("div.row").find("i").attr("style", "color: green");
+                                setTimeout(function () {
+                                    $("#uploadModal").modal("hide");
+                                    $("#imgGallery").modal("hide");
+                                    $("div#drawingList div.drewImg:last-child").click();
+                                }, 1000);
+                            }, 1000);
+                        });
+                    }
+                }
+            }
+        });
+    }
+    var deleteFileCall =
+    #{jsAction @FileUploader.deleteUploadFile(':fileDir',':extension') /}
+    var deleteUploadedFile = function (fileDir, extension) {
+        $.post(deleteFileCall({fileDir: fileDir, extension: extension}), function (data) {
+        });
+    };
+    $(document).on('click', 'div#attachContainer img.deleteUploadedImage', function (event) {
+        deleteUploadedFile($(this).attr('fileDir'), $(this).attr('extension'));
+        $(this).parent().parent().remove();
+        event.stopPropagation();
+        if ($('div#attachContainer ul#uploadBox li').length == 0)
+            $('div#attachContainer ul#uploadBox').append($("div#documentImageTemplate").html());
+    });
+    function uploadClick(ban) {
+        var image = $(ban).find('img');
+        if (image.length > 0) {
+            handleAttachmentClick(image);
+        } else {
+            selectedUbox = "fileAttach";
+            $("div#file-uploader-demo1").find("div.qq-upload-button").find("input").removeAttr("accept");
+            $("div#file-uploader-demo1").find("div.qq-upload-button").find("input").attr("multiple", "multiple");
+            $("#file-uploader-demo1 .qq-upload-button input").click();
+        }
+    }
+</script>
+<script>
+    var task_counter = ${temp == "report" || temp == "dailylog" ? 1 : 0};
+    $(document).ready(function () {
+        $('.cke-editor').each(function () {
+            $(this).ckeditor();
+        });
+    });
+    $("#open-submit").click(function () {
+        if (checkFull()) {
+            $("#draft").val(0);
+            send();
+        }
+    });
+    $("#draft-submit").click(function () {
+        $("#draft").val(1);
+        send();
+    });
+    function checkFull() {
+        var a = "" + $("input#subject").val();
+        if (a.trim() == "") {
+            alert("Сэдвийн нэрээ оруулна уу!");
+            return 0;
+        }
+        if ($("select#assignedTo option:selected").val() == 0) {
+            alert("Олгох ажилтныг сонгоно уу!");
+            return 0;
+        }
+        if (task_counter == 0) {
+            alert("&{'enterTask'}");
+            return 0;
+        }
+        return 1;
+    }
+    $("#assignedTo").change(function () {
+        var selected = $(this).find("option:selected").val();
+        $("#modal-select").find("tr").each(function () {
+            $(this).removeClass('dhidden');
+        });
+        $("#modal-select").find("tr td:nth-child(2)").each(function () {
+            var obj = $(this);
+            if (obj.attr('seltype') == 'u' && obj.attr('uid') == selected) {
+                obj.parent().addClass('dhidden');
+            }
+        });
+    });
+    function send() {
+        var sentDist = "";
+        var addItem = "";
+        $('div#sendUserTag ul li').each(function () {
+            addItem = $(this).attr('id');
+            sentDist += addItem + ",";
+        });
+        $("input#distribution").val(sentDist);
+        $("#form").submit();
+    }
+    function showNewModal() {
+        $("div#saver").html('<button type="button" class="btn btn-success" onclick = "addTask()" >&{'Add'}</button>');
+        $("div#remover").html('<button style="float: left" type="button" class="btn btn-default"data-dismiss="modal">&{'Close'}</button>');
+        $("#task").modal('toggle');
+    }
+    function cleanModal() {
+        $("form#addtask input").val("");
+        $("form#addtask textarea").val("");
+        $("form#addtask select#taskschedule").selectpicker('val', 'No');
+        $("form#addtask select#taskcost").selectpicker('val', 'No');
+        $("form#addtask select#taskpriority").selectpicker('val', 'Low');
+        $("form#addtask table#daalgavar tr td div#drawingList").html('');
+        $("form#addtask table tr:last-child td").find("div#attachContainer ul#uploadBox").html('<li onclick="uploadClick(this)"><span><span></span></span></li>');
+    }
+    function closeModal() {
+        $("#task").modal('hide');
+    }
+    $('#task').on('hide.bs.modal', function (e) {
+        cleanModal();
+    });
+    $('#uploadModal').on('hide.bs.modal', function (e) {
+        $(this).find(".modal-body").html("");
+    });
+    function createTask(item_id) {
+        td = '<td><span>' + item_id + '</span><div class="dhidden">' +
+        '<input type="text" name="taskId" value="' + task_counter + '"/>' +
+        '<input type="text" name="taskSubject" value="' + $("input#tasksubject").val() + '"/>' +
+        '<input type="text" name="taskDueDate" value="' + $("input#taskdueDate").val() + '"/>' +
+        '<input type="text" name="taskLocation" value="' + $("input#tasklocation").val() + '"/>' +
+        '<input type="text" name="taskReference" value="' + $("input#taskreference").val() + '"/>' +
+        '<input type="text" name="taskSchedule" value="' + $("select#taskschedule option:selected").val() + '"/>' +
+        '<input type="text" name="taskCost" value="' + $("select#taskcost option:selected").val() + '"/>' +
+        '<input type="text" name="taskPriority" value="' + $("select#taskpriority option:selected").val() + '"/>' +
+        '<input type="text" name="taskDesc" value="' + $("textarea#editor1").val() + '"/>' +
+        '<div id="att">';
+        var counter = 0;
+        $("div#attachContainer ul#uploadBox img.imgIcon").each(function () {
+            counter++;
+            td = td + "<div><input type=hidden name='filename' value='" + $(this).attr('filename') + "'>" +
+            "<input type=hidden name='filedir' value='" + $(this).attr('filedir') + "'>" +
+            "<input type=hidden name='extension' value='" + $(this).attr('extension') + "'></div>";
+        });
+
+        td = td + '</div><input type="text" name="attcount" value="' + counter + '"/><div id="dra">';
+        counter = 0;
+        $("div#drawingList div").each(function () {
+            counter++;
+        });
+        td = td + $("div#drawingList").html() + '</div><input type="text" name="drawcount" value="' + counter + '"/></div>' + '</td>' +
+        '<td>' + $("input#tasksubject").val() + '</td>' +
+        '<td>' + $("input#taskdueDate").val() + '</td>' +
+        '<td>' + $("select#taskschedule option:selected").html() + '</td>' +
+        '<td>' + $("select#taskcost option:selected").html() + '</td>' +
+        '<td>' + $("select#taskpriority option:selected").html() + '</td>';
+        return td;
+    }
+    function addTask() {
+        var tableBody = $("table.task-list tbody");
+        if (checkTask()) {
+            if (task_counter == 0)
+                tableBody.html("");
+            task_counter++;
+            tableBody.html(tableBody.html() + '<tr title="closePanel" onclick="editTask(this)">' + createTask(task_counter) + '</tr>');
+            closeModal();
+        }
+        else return 0;
+    }
+    function editTask(ban) {
+        var div = $(ban).find("td:first-child div.dhidden");
+
+        var a = new Date();
+        $("div#saver").html('<button type="button" class="btn btn-success" onclick = "saveTask(' + $(ban).find("td:first-child").find("span").html() + ')" >&{'Save'}</button>');
+        $("div#remover").html('<button style="float: left" type="button" class="btn btn-danger" onclick="deleter(' + $(ban).find("td:first-child").find("span").html() + ')">&{'Delete'}</button>');
+
+        $("input#tasksubject").val(div.find("input:nth-child(2)").val());
+        $("input#taskdueDate").val(div.find("input:nth-child(3)").val());
+        $("input#tasklocation").val(div.find("input:nth-child(4)").val());
+        $("input#taskreference").val(div.find("input:nth-child(5)").val());
+        $("select#taskschedule").selectpicker('val', div.find("input:nth-child(6)").val());
+        $("select#taskcost").selectpicker('val', div.find("input:nth-child(7)").val());
+        $("select#taskpriority").selectpicker('val', div.find("input:nth-child(8)").val());
+        $("textarea#editor1").val(div.find("input:nth-child(9)").val());
+        var attach = div.find("div#att");
+        var place = $("div#attachContainer ul#uploadBox li");
+        attach.find("div").each(function () {
+            var obj = $(this);
+            $.ajax({
+                type: "POST",
+                data: {
+                    fileDir: obj.find("input:nth-child(2)").val(),
+                    fileName: obj.find("input:first-child").val(),
+                    extension: obj.find("input:last-child").val()
+                },
+                url: "/handleDocumentAttachment"
+            }).success(function (data) {
+                place.before(data);
+            });
+        });
+        $("div#drawingList").html(div.find("div#dra").html());
+        $("#task").modal('toggle');
+
+    }
+    function saveTask(id) {
+        var tr = $("table.task-list tbody tr:nth-child(" + id + ")");
+        if (checkTask()) {
+            tr.html(createTask(tr.find("td:first-child span").html()));
+            closeModal();
+        }
+        else return 0;
+    }
+    function checkTask() {
+        var a = "" + $("input#tasksubject").val();
+        if (a.trim() == "") {
+            alert("&{'InputSubject'}!");
+            return 0;
+        }
+        if (!$("input#taskdueDate").val()) {
+            alert("&{'InputDueDate'}!");
+            return 0;
+        }
+        a = "" + $("textarea#editor1").val().replace("<p>", "").replace("</p>", "");
+        while (a.search("&nbsp;") != -1) {
+            a = a.replace("&nbsp;", "");
+        }
+        if (a.trim() == "") {
+            alert("&{'InputQuestion'}!");
+            return 0;
+        }
+        return 1;
+
+    }
+    function reset_task_counter() {
+        task_counter = 0;
+        $('table.task-list tbody tr').each(function () {
+            task_counter++;
+            $(this).find("td:first-child span").html(task_counter);
+        });
+    }
+    function deleter(id) {
+        $("table.task-list tbody tr:nth-child(" + id + ")").remove();
+        reset_task_counter();
+        if (task_counter == 0)
+            $("table.task-list tbody").html('<tr title="&{'AddTask'}" onclick="showNewModal()"><td>1</td><td><input type="text" disabled class="form-control"/></td><td><input type="text" disabled class="form-control"/></td><td><input type="text" disabled class="form-control"/></td><td><input type="text" disabled class="form-control"/></td><td><input type="text" disabled class="form-control"/></td></tr>');
+        closeModal();
+    }
+
+    function sendToTaskFunc() {
+        var obj = $('div#divSelTask li.selected:first');
+        var tid = obj.attr('tid');
+        if (tid != undefined) {
+            $("input#taskNo").val(tid);
+            $('button#selectChooseTaskButton').html(obj.find('span.task').html());
+        }
+    }
+</script>
+<style>
+    .btn {
+        font-size: 14px;
+    }
+
+    #datepicker:hover {
+        cursor: pointer;
+    }
+
+    table.task-list tbody tr:hover {
+        cursor: pointer;
+    }
+
+    table#daalgavar tr td {
+        padding-top: 7px;
+        padding-bottom: 7px;
+    }
+
+    table#uses tbody tr td:hover {
+        cursor: pointer;
+    }
+
+    .btn {
+        font-size: 14px;
+    }
+
+    div #attachContainer ul {
+        padding: 0;
+        margin-top: 2px;
+        height: 50px;
+    }
+
+    div #attachContainer li {
+        box-shadow: 0 0.5px 5px gray;
+        border-radius: 8px;
+        float: left;
+        height: 50px;
+        width: 50px;
+        list-style: none;
+        margin-left: 1px;
+        cursor: pointer;
+        position: relative;
+        border: 1px solid #808080;
+        background-image: url("/public/images/attach50.png");
+    }
+
+    div #attachContainer li span img.imgIcon {
+        height: 50px;
+        width: 50px;
+        box-shadow: 0 0.5px 5px gray;
+        border-radius: 8px
+    }
+
+    div #attachContainer li span img.deleteUploadedImage {
+        height: 18px;
+        left: 34px;
+        position: absolute;
+        top: 34px;
+        width: 18px;
+    }
+
+    div #attachContainer li span span {
+        margin-top: 4px;
+        float: left;
+        text-align: center;
+    }
+
+    img.imgIcon {
+        width: 50px;
+        height: 50px;
+        box-shadow: 0 0.5px 5px gray;
+        border-radius: 8px;
+    }
+
+    div#pros {
+        vertical-align: middle;
+        padding: auto;
+        box-shadow: 0 0.5px 5px gray;
+        border-radius: 8px;
+    }
+
+    div.thmb:hover {
+        cursor: pointer;
+    }
+
+    div.imgPanel {
+        width: 1046px;
+        border: solid #808080 3px;
+    }
+
+    div#pen-width div span:hover {
+        opacity: 0.5;
+    }
+
+    div#pen-tools div span:hover {
+        opacity: 0.5;
+    }
+
+    div#pen-color div span:hover {
+        opacity: 0.5;
+    }
+
+    tr.selected {
+        background-color: #808080 !important;
+    }
+
+    tr.selected td {
+        background-color: #808080 !important;
+    }
+</style>
+#{selectTasks uid:"${user.id}", title:'Ажил сонгох', effect:10 /}
+#{selectSentUsers containTag:"div#sendUserTag", title:'Хүн сонгох',showTeam:true, effect:13 /}
+#{openGallery /}
+#{ImgThumbnail div:'div.post-images'/}
+#{punchList-edit-config /}

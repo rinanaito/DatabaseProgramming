@@ -1,0 +1,31 @@
+<div style="display:none">
+    <div id="showPictureZoom">
+        <img id="zoomedPicture" src=""/>
+    </div>
+    <a id="showPictureZoomA" href="#showPictureZoom"></a>
+</div>
+<div id="file-uploader-demo1" style="visibility:hidden;height:0;width:0">
+    <noscript>
+        <p>Please enable JavaScript to use file uploader.</p>
+    </noscript>
+</div>
+<div id="attachContainer" style="height: 25px;">
+    <div style="display: none" id="documentImageTemplate">
+        <li>
+        <span>
+          <span></span>
+        </span>
+        </li>
+    </div>
+    <div style="display: none" id="deleteImageTemplate">
+        <img height='12' class='deleteUploadedImage' width='12' src="@{'/public/images/delete-image.png'}"
+             fileDir='#fileDir' extension='#extension'/>
+    </div>
+    <ul id="uploadBox">
+        <li>
+            <span>
+            <span></span>
+            </span>
+        </li>
+    </ul>
+</div>

@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body style="background-color: #add8e6">
+<table cellpadding="0" cellspacing="0" border="0" style="margin-right: auto; margin-left: auto">
+    <tr>
+        <td>
+            <textarea name="" id="text" cols="30" rows="35" style="float: left" onkeyup="counter()"></textarea>
+        </td>
+        <td>
+            <div id="gh"
+                 style="float: left; background-color: white; width:100px; height: 529px; border: solid lightgrey 1px;"></div>
+        </td>
+    </tr>
+    <tr>
+        <td><input id="num" readonly value="0"/>
+        </td>
+        <td>
+            <button id="count" style="float:right;" onclick="filter()">Count</button>
+        </td>
+    </tr>
+</table>
+</body>
+<style>
+</style>
+<script>
+    var letters = ["а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "ө", "п", "р", "с", "т", "у", "ү", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ь", "э", "ю", "я"];
+    var lett = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    var textarea = document.getElementById("text");
+    function counter() {
+        document.getElementById("num").value = textarea.value.length;
+    }
+    function filter() {
+        var string = textarea.value;
+        for (var j = 0; j < letters.length; j++) {
+            for (var i = 0; i < string.length - 1; i++) {
+                if (string.substring(i, i + 1) == letters[j])
+                    lett[j]++;
+            }
+        }
+        var d = document.getElementById("gh");
+        var s = "";
+        for (var i = 0; i < letters.length; i++) {
+            if (lett[i] > 0)
+                s = s + letters[i] + " - " + lett[i] + "<br/>";
+            lett[i] = 0;
+        }
+        d.innerHTML = s;
+    }
+</script>
+</html>

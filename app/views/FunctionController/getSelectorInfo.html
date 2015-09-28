@@ -1,0 +1,40 @@
+<table id="selector-info-table">
+#{if type=='User'}
+    <tr>
+        <td><img src="${obj.profilePicture}" width="70" height="80"></td>
+        <td>${obj.firstName}</br>${obj.lastName}</td>
+    </tr>
+#{/if}
+#{elseif type=='Equipment'}
+    <tr>
+        <td><img src="${obj.image}" width="90" height="60"></td>
+        <td>${obj.idr}</br>${obj.group.name}</td>
+    </tr>
+#{/elseif}
+#{else}
+    <tr>
+        <td id=header>
+            #{if type=='EquMyReq'}
+                <span id=name>${obj.equipment.idr}</span>
+            #{/if}#{else}
+            <span id=name>${obj.reqOwner?.username}</span>
+        #{/else}
+            <span style="float: right;"> ${obj.startDate.format("HH:mm")} to ${obj.finishDate.format("HH:mm")}</span>
+        </td>
+    </tr>
+    <tr>
+        <td>
+        ${obj.task.name}
+        </td>
+    </tr>
+    <tr>
+        <td>Event: ${obj.mission}</td>
+    </tr>
+    <tr>
+        <td>Status: ${obj.status}</td>
+    </tr>
+    <tr>
+        <td>Created: ${obj.createdDate.format("HH:mm")}</td>
+    </tr>
+#{/else}
+</table>

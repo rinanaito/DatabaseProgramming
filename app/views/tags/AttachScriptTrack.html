@@ -1,0 +1,110 @@
+<script type="text/javascript">
+    var attachmentMaxCount = 20;
+    function createUploader() {
+        var uploader = new qq.FileUploader({
+            element: document.getElementById('file-uploader-demo1'),
+            action: '@{FileUploader.uploadFile}',
+            onSubmit: function (id, fileName) {
+                uploader.setParams({uploadPath: '${_uploadPath}', filename: fileName});
+            },
+            onProgress: function (id, fileName, loaded, total) {
+                var li = $('div#attachContainer #uploadBox li:last span span');
+                li.text(parseInt(loaded * 100 / total) + "%");
+            },
+            onComplete: function (id, fileName, responseJSON) {
+                if (responseJSON['success'] == true) {
+                    var attachWhichUpload = $('div#attachContainer #uploadBox li:last');
+                    var li = attachWhichUpload.find('span'),
+                            fileDir = responseJSON['filedir'],
+                            fileName = responseJSON['filename'],
+                            extension = responseJSON['extension'];
+                    if (li.length > 0) {
+                        var ext = checkFileExtension(extension),
+                                imgHtml = "<img src='#src' class='imgIcon' fileDir='#fileDir' fileName='#fileName' extension='#extension'/>";
+                        if (ext == imageFile)imgHtml = imgHtml.replace("#src", fileDir + "t.jpg");
+                        else if (ext == pdfFile) imgHtml = imgHtml.replace("#src", pdfFileIcon);
+                        else if (ext == wordFile) imgHtml = imgHtml.replace("#src", wordFileIcon);
+                        else if (ext == excelFile) imgHtml = imgHtml.replace("#src", excelFileIcon);
+                        else if (ext == videoFile) imgHtml = imgHtml.replace("#src", videoFileIcon);
+                        else if (ext == powerPointFile) imgHtml = imgHtml.replace("#src", powerPointFileIcon);
+                        else if (ext == cadFile) imgHtml = imgHtml.replace("#src", autoCadFileIcon);
+                        else if (ext == viewableVideoFile) imgHtml = imgHtml.replace("#src", viewableVideoIcon);
+                        else if (ext == otherFile) imgHtml = imgHtml.replace("#src", otherFileIcon);
+                        imgHtml = imgHtml.replace("#fileDir", fileDir).replace("#fileName", fileName).replace("#extension", extension);
+                        li.html(imgHtml + $("#deleteImageTemplate").html().replace('#fileDir', fileDir).replace("#extension", extension));
+                        if ($("div#attachContainer #uploadBox li").length < attachmentMaxCount)
+                            $('div#attachContainer #uploadBox').append($("div#documentImageTemplate").html());
+                    }
+                }
+            }
+        });
+    }
+    var deleteFileCall =
+    #{jsAction @FileUploader.deleteUploadFile(':fileDir',':extension') /}
+    var deleteUploadedFile = function (fileDir, extension) {
+        $.post(deleteFileCall({fileDir: fileDir, extension: extension}), function (data) {
+        });
+    };
+
+    $(document).ready(function () {
+        createUploader();
+    });
+    $(document).on('click', 'div#attachContainer img.deleteUploadedImage', function (event) {
+        deleteUploadedFile($(this).attr('fileDir'), $(this).attr('extension'));
+        $(this).parent().parent().remove();
+        event.stopPropagation();
+        if ($('div#attachContainer ul#uploadBox li').length == 0)
+            $('div#attachContainer ul#uploadBox').append($("div#documentImageTemplate").html());
+    });
+    $(document).on('click', "div#attachContainer li", function () {
+        var image = $(this).find('img');
+        if (image.length > 0) {
+            handleAttachmentClick(image);
+        } else {
+            $("#file-uploader-demo1 .qq-upload-button input").click();
+        }
+    });
+
+</script>
+<style type="text/css">
+    div #attachContainer ul {
+        padding: 0;
+        margin-top: 2px;
+        height: 50px;
+    }
+
+    div #attachContainer li {
+        box-shadow: 0 0.5px 5px gray;
+        border-radius: 8px;
+        float: left;
+        height: 50px;
+        width: 50px;
+        list-style: none;
+        margin-left: 1px;
+        cursor: pointer;
+        position: relative;
+        border: 1px solid #808080;
+        background-image: url("/public/images/attach50.png");
+    }
+
+    div #attachContainer li span img.imgIcon {
+        height: 50px;
+        width: 50px;
+        box-shadow: 0 0.5px 5px gray;
+        border-radius: 8px
+    }
+
+    div #attachContainer li span img.deleteUploadedImage {
+        height: 18px;
+        left: 34px;
+        position: absolute;
+        top: 34px;
+        width: 18px;
+    }
+
+    div #attachContainer li span span {
+        margin-top: 4px;
+        float: left;
+        text-align: center;
+    }
+</style>

@@ -1,0 +1,714 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'PunchList'/}
+#{jqueryui-config /}
+#{fileupload-config /}
+#{checkFileExtension /}
+<script src="/assets/plugins/currentset/d3.js" type="text/javascript"></script>
+
+<div id="main-content" style="font-weight: 500; width: 25cm; margin-right: auto; margin-left: auto">
+    <div class="header">
+        <div class="page-title" style="float: left;">
+            <a href="@{PunchLists.viewAll()}">
+                <i class="fa fa-angle-left"></i> <span>&{'Back'}</span>
+            </a>
+        </div>
+        <div style="float: right; margin-top: 20px;">
+            <a href="punchListPrint?id=${punchList.id}">
+                <button class="btn btn-default"><i class="fa fa-print m-r-10"></i>&{'Print'}
+                </button>
+            </a>
+
+        #{if punchList.questionReceivedFrom.id == user.id && punchList.punchList_status.status != "Draft"}
+            <button class="btn btn-default align-center" onclick="openForward()"
+                    style="">&{'Forward'}
+            </button>
+        #{/if}
+        #{if punchList.questionReceivedFrom.id == user.id && punchList.punchList_status.status == "Open"}
+            <a href="@{PunchLists.close(punchList.id)}" style="text-decoration: none;">
+                <button class="btn btn-default"><i class="fa fa-check-circle-o m-r-10"></i>&{'Close'}
+                </button>
+            </a>
+        #{/if}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="background-color: white; margin-left: 1%; width: 98%">
+            <div class="row">
+                <div class="col-md-12">
+                    <table id="details-table" style="margin-top: 20px;width:100%;font-family: Arial; text-align: left;"
+                           border="0"
+                           cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td class="td" colspan="4"
+                                style="background-color: black; color: white; height: 34px; width: 80%; border: solid black 1px">
+                            &{'PunchList'}
+                            </td>
+                            <td style="width: 20%; border: solid black 1px">
+                                <span class="td" style="margin-left: 3%; margin-right: 2%;">Punch List No:</span>
+                            ${punchList.id}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4">
+                                <span class="td">&{'Subject'}:</span>
+                            ${punchList.name}
+                            </td>
+                            <td rowspan="4" class="align-center" style="border-bottom: none!important;">
+                                <div>
+                                    <img style="width: 60%;"
+                                         src="/public/images/logo/logo.png">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4">
+                                <span class="td">&{'Project'}:</span>
+                            ${punchList.project.name}
+                            </td>
+                        </tr>
+                    #{if punchList.task != null}
+                        <tr>
+                            <td colspan="4">
+                                <span class="td">&{'Task'}: </span>
+                            ${punchList.task.code} - ${punchList.task.projectObject.name}, ${punchList.task.name}
+                            </td>
+                        </tr>
+                    #{/if}
+                        <tr>
+                            <td colspan="2">
+                                <span class="td">&{'AssignedTo'}:</span>
+                            ${punchList.assignee.getLastnameFirstCharacter()}. ${punchList.assignee.firstName}
+                            </td>
+                            <td colspan="2">
+                                <span class="td">&{'Position'}:</span>
+                            ${punchList.assignee.userPosition.name}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <span class="td">&{'QuestionReceivedFrom'}:</span>
+                            ${punchList.questionReceivedFrom.getLastnameFirstCharacter()}.
+                            ${punchList.questionReceivedFrom.firstName}
+                            </td>
+                            <td colspan="2">
+                                <span class="td">&{'Position'}:</span>
+                            ${punchList.questionReceivedFrom.userPosition.name}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div style="margin-top:30px; width:100%; border: solid black 1px;">
+                        <table cellpadding="0" cellspacing="0" class="table table-tools" style="margin: 0;">
+                            <thead style="background-color: #000000;color: white;">
+                            <tr>
+                                <th style="width: auto">
+                                    <span style="float: left;">&{'Daalgavar'}</span>
+                                </th>
+                            %{
+                                int resolved = 0;
+                                for(int i = 0; i < punchList.punchListTasks.size(); i++)
+                                if(punchList.punchListTasks.get(i).isResolve)
+                                resolved++;
+                                if(resolved != 0) resolved = resolved * 100 / punchList.punchListTasks.size();
+                                String res = String.valueOf(resolved);
+                                }%
+                                <th class="align-right" style="width: 150px;"><span
+                                        style="text-transform: none; font-weight: normal; margin-right: 5%">&{'Done'}
+                                    :</span> ${res.substring(0,(res.length() > 4 ? 4 : res.length()))}%</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <table id="posts-table" class="table table-tools table-hover task-list"
+                                       style="margin: 0; width: 100%;">
+                                    <thead style="background-color: lightgrey; color: black;">
+                                    <tr>
+                                        <td id="id" class="text-center" style="width:49px">
+                                            #
+                                        </td>
+                                        <td style="width: auto">
+                                        &{'Subject'}
+                                        </td>
+                                        <td class="text-center" style="width: 150px;">
+                                        &{'DueDate'}
+                                        </td>
+                                        <td class="text-center" style="width: 130px;">
+                                        &{'ScheduleImpact'}
+                                        </td>
+                                        <td class="text-center" style="width: 140px;">
+                                        &{'CostImpact'}
+                                        </td>
+                                        <td class="text-center" style="width: 140px;">
+                                        &{'Priority'}
+                                        </td>
+                                        <td style="width: 40px"></td>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    #{list items:punchList.punchListTasks, as:'task'}
+                                    <tr title="&{'ShowDaalgavar'}" onclick="showTask(${task.id})">
+                                        <td class="text-center">
+                                            <span>${task.No}</span>
+                                        </td>
+                                        <td>${task.name}</td>
+                                        <td class="text-center">${task.dueDate.format("yyyy-MM-dd")}</td>
+                                        <td class="text-center">&{task.scheduleImpact.impact}</td>
+                                        <td class="text-center">&{task.costImpact.impact}</td>
+                                        <td class="text-center">&{task.priority.priority}</td>
+                                        <td><span class="dhidden">${task.isResolve ? '1' : '0'}</span><i
+                                                class="fa fa-${task.isResolve ? 'check' : 'circle-o'}"
+                                                style="color: ${task.isResolve ? 'green' : 'red'}"></i></td>
+                                    </tr>
+                                    #{/list}
+                                    </tbody>
+                                </table>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="padding-bottom: 30px">
+                <div class="col-md-12">
+                #{if punchList.distributions.size()}
+                    <table id="details-table"
+                           style="margin-top: 30px;width: 100%; font-family: Arial; text-align: left;" border="0"
+                           cellpadding="0" cellspacing="0">
+                        <tbody style="border: solid #000000 1px;">
+                        <tr valign="middle">
+                            <td colspan="3" style="padding-top: 5px; font-size: 14px;">
+                            <span class="td" style="height: 100%; float: left">
+                        &{'Distribution'}:</span>
+
+                                <div style="float: left">
+                                    #{list items:punchList.distributions, as:'dist'}
+                                        <span>${dist.getName()}</span>
+                                        <br>
+                                    #{/list}
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                #{/if}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="forward" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4></h4>
+            </div>
+            <div class="modal-body">
+                <form id="ford" action="@{PunchLists.forward()}" method="post">
+                    <input type="hidden" name="id" value="${punchList.id}"/>
+
+                    <div class="row" style="padding-top: 1%; background-color: white">
+                        <div class="col-md-8 post-column-left">
+                            <div class="form-group row">
+                                <label><span class="td">&{'Description'}</span></label>
+                                <br>
+                                <textarea rows="4" id="text" class="form-control" name="description"></textarea>
+                                <br/>
+                                <button type="button" onclick="send()"
+                                        class="btn btn-danger btn-transparent">&{'Send'}</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="post-column-right" style="height: 175px;">
+                                <div class="form-group">
+                                    <div id="sendUserTag"></div>
+                                    <button style="width: 100%; margin-top: -2px;" type="button"
+                                            class="btn btn-effect btn-default" data-toggle="modal"
+                                            data-target="#modal-select"
+                                            id="selectSendUserButton">&{'Distribution'}</button>
+                                    <input type="hidden" name="distribution" id="distribution" value=""/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="task" tabindex="-1" role="dialog" aria-hidden="true" style="">
+    <div class="modal-dialog modal-lg" style="width: 21cm;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4></h4>
+            </div>
+            <div class="modal-body" id="itemView" style="padding: 5%;">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="isResolve" tabindex="-1" role="dialog" aria-hidden="true" style="">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4></h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row align-center" id="text">
+                            <span>&{'isResolve?'}</span>
+                        </div>
+                        <div class="row" style="margin-top: 20px;">
+                            <div class="col-md-6" id="saver" style="text-align: center">
+                                <button id="Yes" class="btn btn-success">&{'Yes'}</button>
+                            </div>
+                            <div class="col-md-6" style="text-align: center">
+                                <button id="No" class="btn btn-danger">&{'No'}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<img class="img dhidden"/>
+<div class="modal fade" id="imgView" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><strong style="margin-left: 50px">&{'AddDaalgavar'}</strong></h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <svg id="svg" xmlns="http://www.w3.org/2000/svg" version="1.1"
+                         style="width: 100%; min-height: 550px; position: relative;height: 100%; cursor: move;">
+                        <foreignObject width="900" height="701" class="imgPanel" id="outer_group"
+                                       style="border: solid black 1px;stroke-width: 1.5px;"
+                                       transform="translate(90,1)scale(1)" scaler="1">
+                            <svg id="stage"></svg>
+                        </foreignObject>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var _type = "Path";
+    var _color = "red";
+    var _opacity = 1.0;
+    var _width = 4;
+    var _text = "";
+    var _fontSize = 12;
+    var _offset = $("#outer_group").offset();
+    var newElement = null;
+    var _points = [];
+    var startPoint = [];
+    var endPoint = [];
+    var activityHistory = [];
+    var activityJson = [];
+    var svg = d3.select("#svg");
+    var svg_group = d3.select('#outer_group');
+    var group = document.getElementById('stage');
+    var zoom = d3.behavior.zoom()
+            .translate([0, 0])
+            .scale(1)
+            .scaleExtent([.5, 20])
+            .on("zoom", zoomed);
+    var no_zoom = d3.behavior.zoom();
+    function zoomed() {
+        svg_group.style("stroke-width", 1.5 / d3.event.scale + "px");
+        svg_group.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        svg_group.attr("scaler", d3.event.scale);
+    }
+
+    function sector(ban) {
+//        if ($(ban).attr("class") == "pinned") {
+//            alert();
+//        }
+    }
+    function readerJson(stringer) {
+        activityJson = jQuery.parseJSON(stringer);
+        var dan = svg_group.attr("scaler");
+        for (var i = 0; i < activityJson.length; i++) {
+            var json = activityJson[i];
+            newElement = null;
+            _type = json.type;
+            _color = json.color;
+            _width = json.width;
+            _fontSize = json.fontSize;
+            _text = json.text;
+            _points = [];
+            startPoint = [];
+            endPoint = [];
+            if (_type == "Path") {
+                var path = json.path;
+                var p = path.split(",");
+                path = "M" + p[0] / dan + "," + p[1] / dan;
+                _points.push([p[0], p[1]]);
+                for (var j = 2, n = p.length - 1; j < n; j += 2) {
+                    path += "L" + p[j] / dan + "," + p[j + 1] / dan;
+                    _points.push([p[j], p[j + 1]]);
+                }
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+                newElement.setAttribute("fill", "none");
+                newElement.setAttribute("d", path);
+                newElement.style.strokeLinecap = "round";
+                newElement.style.strokeLinejoin = "round";
+                newElement.style.stroke = _color;
+                newElement.style.strokeWidth = _width;
+            }
+            if (_type == "Rectangle") {
+                startPoint = json.start;
+                endPoint = json.end;
+                var a = startPoint[0] - endPoint[0], b = startPoint[1] - endPoint[1];
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+                newElement.setAttribute("fill", "none");
+                newElement.setAttribute("x", a > 0 ? endPoint[0] / dan : startPoint[0] / dan);
+                newElement.setAttribute("y", b > 0 ? endPoint[1] / dan : startPoint[1] / dan);
+                newElement.setAttribute("width", a < 0 ? -a / dan : a / dan);
+                newElement.setAttribute("height", b < 0 ? -b / dan : b / dan);
+                newElement.style.stroke = _color;
+                newElement.style.strokeWidth = _width;
+            }
+            if (_type == "Circle") {
+                startPoint = json.start;
+                endPoint = json.end;
+                var a = (startPoint[0] - endPoint[0]) / 2, b = (startPoint[1] - endPoint[1]) / 2;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'ellipse');
+                newElement.setAttribute("fill", "none");
+                newElement.setAttribute("cx", (startPoint[0] + endPoint[0]) / (2 * dan));
+                newElement.setAttribute("cy", (startPoint[1] + endPoint[1]) / (2 * dan));
+                newElement.setAttribute("rx", a < 0 ? -a / dan : a / dan);
+                newElement.setAttribute("ry", b < 0 ? -b / dan : b / dan);
+                newElement.style.strokeLinecap = "round";
+                newElement.style.strokeLinejoin = "round";
+                newElement.style.stroke = _color;
+                newElement.style.strokeWidth = _width;
+            }
+            if (_type == "Line") {
+                startPoint = json.start;
+                endPoint = json.end;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                newElement.setAttribute("fill", "none");
+                newElement.setAttribute("x1", startPoint[0] / dan);
+                newElement.setAttribute("y1", startPoint[1] / dan);
+                newElement.setAttribute("x2", endPoint[0] / dan);
+                newElement.setAttribute("y2", endPoint[1] / dan);
+                newElement.style.strokeLinecap = "round";
+                newElement.style.strokeLinejoin = "round";
+                newElement.style.stroke = _color;
+                newElement.style.strokeWidth = _width;
+            }
+            if (_type == "Arrow1") {
+                startPoint = json.start;
+                endPoint = json.end;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                line.setAttribute("x1", startPoint[0] / dan);
+                line.setAttribute("y1", startPoint[1] / dan);
+                line.setAttribute("x2", endPoint[0] / dan);
+                line.setAttribute("y2", endPoint[1] / dan);
+                line.style.stroke = _color;
+                line.style.strokeWidth = _width;
+                newElement.appendChild(line);
+                var D = Math.sqrt((endPoint[0] - startPoint[0]) * (endPoint[0] - startPoint[0]) + (endPoint[1] - startPoint[1]) * (endPoint[1] - startPoint[1]));
+                if (D > _width * 3) {
+                    var angle = 20 * Math.PI / 180;
+                    var lineangle = Math.atan2(endPoint[1] - startPoint[1], endPoint[0] - startPoint[0]);
+                    var h = Math.abs(_width * 2 / Math.cos(angle));
+                    var angle1 = lineangle + Math.PI + angle;
+                    var topx = endPoint[0] + Math.cos(angle1) * h;
+                    var topy = endPoint[1] + Math.sin(angle1) * h;
+                    var angle2 = lineangle + Math.PI - angle;
+                    var botx = endPoint[0] + Math.cos(angle2) * h;
+                    var boty = endPoint[1] + Math.sin(angle2) * h;
+                    var trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + endPoint[0] / dan + "," + endPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                }
+            }
+            if (_type == "Arrow2") {
+                startPoint = json.start;
+                endPoint = json.end;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                line.setAttribute("x1", startPoint[0] / dan);
+                line.setAttribute("y1", startPoint[1] / dan);
+                line.setAttribute("x2", endPoint[0] / dan);
+                line.setAttribute("y2", endPoint[1] / dan);
+                line.style.stroke = _color;
+                line.style.strokeWidth = _width;
+                newElement.appendChild(line);
+                var D = Math.sqrt((endPoint[0] - startPoint[0]) * (endPoint[0] - startPoint[0]) + (endPoint[1] - startPoint[1]) * (endPoint[1] - startPoint[1]));
+                if (D > _width * 5) {
+                    var angle = 20 * Math.PI / 180;
+                    var lineangle = Math.atan2(endPoint[1] - startPoint[1], endPoint[0] - startPoint[0]);
+                    var h = Math.abs(_width * 2 / Math.cos(angle));
+                    var angle1 = lineangle + Math.PI + angle;
+                    var topx = endPoint[0] + Math.cos(angle1) * h;
+                    var topy = endPoint[1] + Math.sin(angle1) * h;
+                    var angle2 = lineangle + Math.PI - angle;
+                    var botx = endPoint[0] + Math.cos(angle2) * h;
+                    var boty = endPoint[1] + Math.sin(angle2) * h;
+                    var trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + endPoint[0] / dan + "," + endPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                    lineangle = Math.atan2(startPoint[1] - endPoint[1], startPoint[0] - endPoint[0]);
+                    angle1 = lineangle + Math.PI + angle;
+                    topx = startPoint[0] + Math.cos(angle1) * h;
+                    topy = startPoint[1] + Math.sin(angle1) * h;
+                    angle2 = lineangle + Math.PI - angle;
+                    botx = startPoint[0] + Math.cos(angle2) * h;
+                    boty = startPoint[1] + Math.sin(angle2) * h;
+                    trangle = null;
+                    trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + startPoint[0] / dan + "," + startPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                }
+            }
+            if (_type == "Text") {
+                startPoint = json.start;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+                newElement.setAttributeNS(null, "fill", _color);
+                newElement.setAttributeNS(null, "x", startPoint[0] / dan);
+                newElement.setAttributeNS(null, "y", (parseFloat(startPoint[1]) + parseFloat(_fontSize)) / dan);
+                newElement.setAttributeNS(null, "font-size", _fontSize);
+                var textNode = document.createTextNode(_text);
+                newElement.appendChild(textNode);
+            }
+            if (_type == "Pin") {
+                startPoint = json.start;
+                endPoint = json.end;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'image');
+                newElement.setAttributeNS(null, 'height', 50);
+                newElement.setAttributeNS(null, 'width', 50);
+                newElement.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '/public/images/drawing/redPin.png');
+                newElement.setAttributeNS(null, 'x', (startPoint[0] - 30) / dan);
+                newElement.setAttributeNS(null, 'y', (startPoint[1] - 25) / dan);
+                newElement.setAttributeNS(null, 'class', 'pinned');
+            }
+            group.appendChild(newElement);
+        }
+    }
+</script>
+<script type="text/javascript">
+    function editDrawing(ban) {
+        $("img.img").attr("src", $(ban).find("img").attr("src"));
+        var wid = $("img.img").css("width");
+        var hei = $("img.img").css("height");
+        var foreign = document.getElementById('outer_group');
+        foreign.setAttribute('width', wid.substr(0, wid.length - 2));
+        foreign.setAttribute('height', hei.substr(0, hei.length - 2));
+        foreign.setAttribute('scaler', "1");
+        var svging = document.getElementById('stage');
+        svging.setAttribute('style', "background: url('" + $("img.img").attr("src") + "') no-repeat center; width:" + wid + "; height:" + hei + ";");
+        svg.call(zoom);
+        readerJson($(ban).find("input.drawingPin").val());
+        $("#imgView").modal('show');
+    }
+    $("#imgView").on('hide.bs.modal', function (e) {
+
+        $("svg#stage").empty();
+    });
+</script>
+<script>
+    function send() {
+        var sentDist = "";
+        var addItem = "";
+        $('div#sendUserTag ul li').each(function () {
+            addItem = $(this).attr('id');
+            sentDist += addItem + ",";
+        });
+        $("input#distribution").val(sentDist);
+        $("#ford").submit();
+    }
+    $(document).ready(function () {
+        var opt = {};
+        // Tools: export to Excel, CSV, PDF & Print
+        opt.sDom = "",
+                opt.oLanguage = {"sSearch": "", "sZeroRecords": "Үр дүн байхгүй байна."} ,
+                opt.oTableTools = {
+                    "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": ["pdf"]
+                };
+        opt.aaSorting = [[0, 'asc']];
+        opt.aoColumnDefs = [
+            {'bSortable': false, 'aTargets': []}
+        ];
+
+        var oTable = $('#posts-table').dataTable(opt);
+        oTable.fnDraw();
+
+        /* Add a placeholder to search input */
+        $('.dataTables_filter input').attr("placeholder", "Search an article...");
+
+
+        var selected = ${punchList.assignee.id};
+        $("#modal-select").find("tr td:nth-child(2)").each(function () {
+            var obj = $(this);
+            if (obj.attr('seltype') == 'u' && obj.attr('uid') == selected) {
+                obj.parent().addClass('dhidden');
+            }
+        });
+
+    });
+    var modal = "";
+    function showTask(id) {
+        if (modal != id) {
+            $.ajax({
+                type: "POST",
+                data: {
+                    id: id,
+                    key: "on"
+                },
+                url: "/getItem",
+                beforeSend: function () {
+                    modal = "";
+                    $("div#itemView").html('<img src="public/images/ajax-horizontal.gif"/>');
+                }
+            }).success(function (data) {
+                modal = id;
+                $("div#itemView").html(data);
+            });
+        }
+        $("#task").modal('show');
+    }
+    function checkReply() {
+        a = "" + $("textarea#replytext").val().replace("<p>", "").replace("</p>", "");
+        while (a.search("&nbsp;") != -1) {
+            a = a.replace("&nbsp;", "");
+        }
+        if (a.trim() == "") {
+            alert("&{'InputDescription'}!");
+            return 0;
+        }
+        return 1;
+    }
+    function op() {
+        if (checkReply()) {
+            $("div#text").html('<span>&{'isResolve?'}</span>');
+            $("div#saver").html('<button id="Yes" class="btn btn-success" onclick="Yesclick()">&{'Yes'}</button>');
+            $("#isResolve").modal('show');
+        }
+    }
+    function send() {
+        var sentDist = "";
+        var addItem = "";
+        $('div#sendUserTag ul li').each(function () {
+            addItem = $(this).attr('id');
+            sentDist += addItem + ",";
+        });
+        $("input#distribution").val(sentDist);
+        $("#ford").submit();
+    }
+    function cancelop() {
+        if (checkReply()) {
+            $("div#text").html('<span>&{'isCancel?'}</span>');
+            $("div#saver").html('<button id="Cancel" class="btn btn-success" onclick="Cancelclick()">&{'Cancel'}</button>');
+            $("#isResolve").modal('show');
+        }
+    }
+    function Yesclick() {
+        $("input#checkbox").val("1");
+        formSubmit();
+    }
+    $('button#No').click(function () {
+        formSubmit();
+    });
+    function Cancelclick() {
+        $("input#checkbox").val("0");
+        formSubmit();
+    }
+    function openForward() {
+        $('#forward').modal('show');
+    }
+    function formSubmit() {
+        var obj = $('div#attaches');
+        $("div#attachContainer ul#uploadBox img.imgIcon").each(function () {
+            obj.append("<input type='hidden' name='filename' value=" + $(this).attr('filename') + ">" +
+            "<input type='hidden' name='filedir' value=" + $(this).attr('filedir') + ">" +
+            "<input type='hidden' name='extension' value=" + $(this).attr('extension') + ">");
+        });
+        $("#isResolve").modal('hide');
+        $("form#replyField").submit();
+
+    }
+</script>
+<style>
+    .btn {
+        font-size: 13px;
+    }
+
+    table#details-table tr:first-child td, table#item-details-table tr:first-child td {
+        font-size: 16px;
+    }
+
+    table#details-table tr td, table#item-details-table tr td {
+        font-size: 14px;
+        height: 32px;
+        width: auto;
+    }
+
+    table#details-table tr, table#item-details-table tr {
+        border-bottom: solid black 1px;
+        height: 32px;
+    }
+
+    table#details-table tr:last-child td, table#item-details-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    table#question-table tr {
+        height: 32px;
+        font-size: 14px;
+    }
+
+    .td {
+        padding-left: 10px;
+        padding-right: 10px;
+        font-weight: bold;
+    }
+
+    .align-right {
+        text-align: right;
+        padding-right: 2%;
+    }
+
+    .align-center {
+        text-align: center;
+    }
+
+    table.task-list tbody tr:hover {
+        cursor: pointer;
+    }
+
+    div.post-images img {
+        border-radius: 10px;
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    a:hover {
+        text-decoration: none;
+    }
+
+</style>
+#{selectSentUsers containTag:"div#sendUserTag", title:'Хүн сонгох',showTeam:true, effect:13 /}
+#{punchList-edit-config /}

@@ -1,0 +1,57 @@
+%{ if(type=="project"){ }%
+<ul class="project s-user">
+    #{list items:projects,as:'project'}
+        <li  rootProject="project-${project.id}" user='user-${project.owner.id}' id="${project.owner.id}">
+            <div id="${project.owner.id}">
+                <img src="${project.owner.profilePicture}" height="54" width="47" style="float: left;">
+
+                <a type="project" id="${project.id}">${project.owner.username}</a>
+                <span type="project" id="${project.id}" class="taskName">${project.name} (${project.taskGroups.size()})</span>
+
+                <br/>
+                <span>${project.owner.firstName}</span>
+                <span>${project.owner.lastName}</span>
+                <input type="checkbox"/>
+            </div>
+        </li>
+    #{/list}
+</ul>
+%{ }else if(type=="taskGroup"){ }%
+<ul class="taskGroup s-user">
+    #{list items:taskGroups,as:'taskGroup'}
+        %{ type = taskGroup; }%
+        <li  user="user-${type.owner?.id}" taskGroup="taskGroup-${type.id}" id="${type.owner?.id}">
+            <div id="${type.owner?.id}">
+                <img src="${type.owner?.profilePicture}" height="54" width="47" style="float: left;">
+
+                <a type="taskGroup" id="${type.id}" style="color: #5686a8">${type.owner?.username}</a>
+
+                <span type="project" id="${type.id}" class="taskName">${type.name} (${type.tasks.size()})</span>
+
+                <br/>
+                <span>${type.owner?.firstName} </span>
+                <span>${type.owner?.lastName}</span>
+                <input type="checkbox"/>
+            </div>
+        </li>
+    #{/list}
+</ul>
+%{ }else if(type=="task"){ }%
+<ul class="task s-user">
+    #{list items:tasks,as:'task'}
+        %{ type = task; }%
+        <li  id="${type.owner?.id}">
+            <div id="${type.owner?.id}">
+                <img src="${type.owner?.profilePicture}" height="54" width="47" style="float: left;">
+                <a type="task" id="${type.id}" style="color: #5896c8">${type.owner?.username}</a>
+                <span type="project" id="${type.id}" class="taskName">${type.name}</span>
+                <br/>
+                <span>${type.owner?.firstName} </span>
+                <span>${type.owner?.lastName}</span>
+                <input type="checkbox"/>
+            </div>
+        </li>
+    #{/list}
+</ul>
+%{ } }%
+

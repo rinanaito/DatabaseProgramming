@@ -1,0 +1,226 @@
+#{extends 'CRUD/layout.html' /}
+
+#{fileupload-config /}
+#{fancybox-config /}
+
+<style type="text/css">
+    div#profilePicture {
+        height: 125px;
+    }
+
+    div#profilePicture span.uploadButton {
+        margin: 3px 0 0 10px;
+    }
+
+    div#profilePicture span {
+        float: left;
+        clear: both;
+    }
+
+    div#profilePicture span img {
+        float: left;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0px 0px 3px black;
+        background: gray;
+        height: 100px;
+        width: 88px;
+        margin: 3px 0 0 1px;
+        border-radius: 3px;
+    }
+
+    div#profilePicture img {
+
+    }
+
+    div#profilePicture h3 {
+        margin-left: 110px;
+    }
+
+    span.info {
+        font-size: 11px;
+        color: #555;
+    }
+
+    #password-input span {
+        display: inline-block;
+        width: 100px;
+        color: #555;
+
+    }
+
+</style>
+<script type="text/javascript">
+    var uploader;
+    function createUploader() {
+        uploader = new qq.FileUploader({
+
+            element: document.getElementById('file-uploader-demo2'),
+            action: '@{FileUploader.uploadFileCustom}',
+            onSubmit: function (id, fileName) {
+                uploader.setParams({uploadPath: "${controllers.Consts.uploadUserImagePath}", filename: fileName,
+                    upfilename: "${object.username}", ratio: "350x400" });
+            },
+            onProgress: function (id, fileName, loaded, total) {
+                var s = $("#uploadProgress");
+                if (s.length > 0)
+                    s.text(parseInt(loaded * 100 / total) + "%");
+            },
+            onComplete: function (id, fileName, responseJSON) {
+                var profileUrl = responseJSON['filedir'] + responseJSON['filename'];
+                $("#profilePicture span img").attr('src', profileUrl);
+                $("#uploadProgress").text('');
+                $("#object_profilePicture").val(profileUrl);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        $("#showBox").fancybox();
+
+        $("#profilePicture span.uploadButton input").click(function () {
+            $(".qq-upload-button input").click();
+        });
+
+        $("#profilePicture span img").click(function () {
+            $("img#zoomedPicture").attr('src', $(this).attr('src'));
+            $("a#showBox").click();
+        });
+        createUploader();
+        $("form").submit(function () {
+            if ($("#changePassword").is(':checked')) {
+                if ($("#password").val().length > 5) {
+                    if ($("#password").val() == $("#confirm").val()) {
+                        return true;
+                    } else {
+                        $("#password-input").find(".crudHelp").text("Баталгаажуулалт буруу байна.").width(300);
+                    }
+                } else {
+                    $("#password-input").find(".crudHelp").text("Нууц үг 5-с дээш тэмдэгт байх ёстой").width(300);
+                }
+                return false;
+            }
+            return true;
+        });
+    });
+    function selectUserTeam() {
+        var obj = $('select#object_userTeam');
+        var id = $('select#object_company').val();
+        $.ajax({
+            type: "POST",
+            data: "id=" + id,
+            url: "/showUserTeamSelection"}).success(
+                function (data) {
+                    obj.html(data);
+                    if (obj.parent().hasClass('dhidden'))obj.parent().removeClass('dhidden');
+                });
+    }
+</script>
+
+<div style="display:none">
+    <div id="showPictureZoom">
+        <img id="zoomedPicture" src=""/>
+    </div>
+    <a id="showBox" href="#showPictureZoom"></a>
+</div>
+
+<div id="crudShow" class="${type.name}">
+
+    <h2 id="crudShowTitle">&{'crud.show.title', type.modelName}</h2>
+
+    <div class="objectForm">
+    #{form action:@save(object._key()), enctype:'multipart/form-data'}
+        <div id="profilePicture" class="crudField crud_text ">
+            <span>
+                <img src="${object.profilePicture}"></img>
+            </span>
+            <span class="uploadButton">
+            <input type="button" value="Хуулах"/>
+            </span>
+
+            <h3>Зураг</h3>
+
+            <h3 id="uploadProgress"></h3>
+
+            <div id="file-uploader-demo2" style="visibility:hidden;height:0;width:0;float:left;">
+                <noscript>
+                    <p>Please enable JavaScript to use file uploader.</p>
+                    <!-- or put a simple form for upload here -->
+                </noscript>
+            </div>
+
+        </div>
+        <div class="crudField crud_text">
+            <label for="object_resetpass">
+                Нууц үг сэргээх
+            </label>
+            <input type="button" value="Сэргээх" name="object.resetpass" onclick="resetPassword('${object.id}')"
+                   id="object_resetpass">
+        </div>
+        #{crud.form}
+
+            #{crud.custom 'password'}
+                <label for="">&{'password'}</label>
+
+                <div style="display:inline-block;" id=passChange>
+                    <input type="checkbox" id="changePassword" name="changePassword">
+                    <span class="info">Нууц үг солих</span>
+
+                    <div id="password-input" style="display:none;">
+                        <span>&{'password'}:</span><input type="password" name="object.password" id="password"><br>
+                        <span>Дахин бич:</span><input type="password" id="confirm">
+                        <span class="crudHelp"></span>
+                    </div>
+                </div>
+            #{/crud.custom}
+
+            #{crud.custom 'company'}
+                <label for="object_company">Компани</label>
+                <select id="object_company" name="object.company.id" onchange="selectUserTeam()">
+                    <option value="">(Сонголтоос сонгоно уу)</option>
+                    #{list items:companies,as:'comp'}
+                        <option value="${comp.id}" ${comp.id==object.company.id?'selected':''}>${comp.name}</option>
+                    #{/list}
+                </select>
+                <span class="crudHelp">Заавал сонгох.</span>
+            #{/crud.custom}
+
+        #{/crud.form}
+
+        <p class="crudButtons">
+            <input type="submit" name="_save" value="&{'crud.save', type.modelName}"/>
+            <input type="submit" name="_saveAndContinue" value="&{'crud.saveAndContinue', type.modelName}"/>
+        </p>
+        <input type="hidden" id=addTeam1 name="addTeams"/>
+    #{/form}
+    </div>
+
+%{if (user.isManage() || user.isAdmin()){}%
+#{form @delete(object._key())}
+    <p class="crudDelete">
+        <input type="submit" value="&{'crud.delete', type.modelName}"/>
+    </p>
+#{/form}
+%{ } }%
+
+</div>
+<script type="text/javascript">
+    function resetPassword(id) {
+        if (confirm("Нууц үгийг ресет хийх үү?")) {
+            $.ajax({url: "/users/resetpassword/" + id, success: function () {
+                alert("Амжилттай боллоо, Нууц үгй: pass")
+            }, type: "POST"});
+        }
+    }
+    $("#changePassword").click(function () {
+        if ($(this).is(':checked')) {
+            $("#password-input").show();
+        } else {
+            $("#password-input").hide();
+        }
+    });
+    $('input#object_username').attr('disabled', 'disabled');
+    #{if object.userTeam==null}
+    $('select#object_userTeam').parent().addClass('dhidden');
+    #{/if}
+</script>

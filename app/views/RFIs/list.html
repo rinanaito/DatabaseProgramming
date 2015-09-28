@@ -1,0 +1,358 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'RFI'/}
+#{set activeMenuSub:'RFIlist'/}
+<style>
+    .btn {
+        font-size: 13px !important;
+    }
+
+    table tbody tr td {
+        transition: background-color 0.3s;
+    }
+
+    table thead tr th {
+        font-size: 15px !important;
+        line-height: 2px !important;
+    }
+
+    table tbody tr td {
+        line-height: 30px !important;
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+    }
+
+    table tbody tr:hover td {
+        cursor: pointer;
+        background-color: #e3e5e8 !important;
+    }
+
+    a.btn-default:hover {
+        background-color: #2b2e33 !important;
+        color: white !important;
+    }
+
+    .notification {
+        z-index: 5000;
+        right: 20px;
+        bottom: 20px;
+        position: fixed;
+        width: 150px;
+        padding: 8px;
+        min-height: 50px;
+        border-radius: 3px;
+        opacity: 0;
+        transition: opacity 0.5s;
+    }
+
+    .notfOn {
+        opacity: 1;
+        transition: opacity 0.5s;
+    }
+
+    .kamikaze {
+        margin-bottom: 10px;
+    }
+
+</style>
+<div id="main-content" style="font-weight: 500;padding-top: 20px">
+    <div class="row tengu ${assignee == "0" && tas[0]== "0" && keyword == "" ? 'kamikaze': ''}">
+        <div class="col-md-12">
+            <div class=" ${assignee == "0" && tas[0]== "0" && keyword == "" ? '': 'dhidden'}" id="status-row">
+                <div class="col-md-2" style=" padding: 0; padding-right: 6px;">
+                    <a href="@{RFIs.viewAll()}"
+                       class="btn btn-${status=="All" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'dark ' : 'default'}"
+                       style="width: 100%">&{'All'}
+                        <span class="label label-${status=="All" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'primary' : 'default'} m-l-10">${all}</span></a>
+                </div>
+                <div class="col-md-2" style=" padding: 0; padding-right: 6px">
+                    <a href="@{RFIs.list("Open","0","",1, "0")}"
+                       class="btn btn-${status=="Open" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'dark ' : 'default'}"
+                       style="width: 100%">&{'Open'} <span
+                            class="label label-${status=="Open" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'primary' : 'default'} m-l-10">${open}</span></a>
+                </div>
+                <div class="col-md-2" style=" padding: 0; padding-right: 6px">
+                    <a href="@{RFIs.list("Closed","0","",1, "0")}"
+                       class="btn btn-${status=="Closed" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'dark ' : 'default'}"
+                       style="width: 100%">&{'Closed'} <span
+                            class="label label-${status=="Closed" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'primary' : 'default'} m-l-10">${close}</span></a>
+                </div>
+                <div class="col-md-2" style=" padding: 0; padding-right: 6px">
+                    <a href="@{RFIs.list("Draft","0","",1, "0")}"
+                       class="btn btn-${status=="Draft" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'dark ' : 'default'}"
+                       style="width: 100%">&{'Draft'} <span
+                            class="label label-${status=="Draft" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'primary' : 'default'} m-l-10">${draft}</span></a>
+                </div>
+                <div class="col-mid-2" style="float: right;margin-left: 6px; padding-right: 0!important;">
+                    <a href="@{RFIs.blank(0, 0,"","","", null)}">
+                        <button type="button" class="btn btn-success"
+                                style="float: right;width: 110px"><i class="fa fa-plus p-r-10"></i>&{'Add'}
+                        </button>
+                    </a>
+                </div>
+                <div class="col-md-2" style="float: right; padding-right: 0!important;">
+                    <button type="button" id="filter-plus" class="btn btn-effect btn-primary" data-modal="filter"
+                            style="float: right;width: 110px">
+                        <i class="fa fa-search-plus p-r-10"></i>&{'Filter'}
+                    </button>
+                </div>
+            </div>
+            <div class=" ${assignee == "0" && keyword == "" ? 'dhidden': ''}" id="filter-row">
+                <form id="filterForm" action="@{RFIs.list()}" method="get">
+                    <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                        <select name="assignee" class="form-control">
+                            <option value="0">&{'ByAssignee'}</option>
+                            <option data-divider="true"></option>
+                            <option value="${user.id}" ${assignee == user.id.toString() ? 'selected' :''}>&{'Mine'}</option>
+                            <option data-divider="true"></option>
+                        #{list items:users, as:'usr'}
+                            #{if usr.id != user.id}
+                                <option style="padding-left: 35px;"
+                                        value="${usr.id}" ${assignee == usr.id.toString() ? 'selected' :''}>
+                                ${usr.getLastnameFirstCharacter()}. ${usr.firstName}
+                                </option>
+                            #{/if}
+                        #{/list}
+                        </select>
+                    </div>
+                    <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                        <select name="tasky" class="form-control">
+                            <option value="0">&{'ByTask'}</option>
+                            <option data-divider="true"></option>
+                        #{list items:projectObjects, as:'object'}
+                            #{if object.tasks.size()}
+                                <option value="o-${object.id}"
+                                        style="font-weight: bold!important;" ${tas[0] == "t" && tas[1] == object.id.toString() ? 'selected' :''}>${object.name}</option>
+                                #{list items:object.tasks, as:'task'}
+                                    <option style="padding-left: 35px;"
+                                            value="t-${task.id}" ${tas[0] == "u" && tas[1] == task.id.toString() ? 'selected' :''}>
+                                    ${task.name}
+                                    </option>
+                                #{/list}
+                                #{if object_index != projectObjects.size()}
+                                    <option data-divider="true"></option>
+                                #{/if}
+                            #{/if}
+                        #{/list}
+                        </select>
+                    </div>
+                    <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                        <select name="status" title="Choose one" class="form-control">
+                            <option value="All" ${status == "All" ? 'selected' : ''}>&{'ByStatus'}</option>
+                            <option value="Open" ${status == "Open" ? 'selected' : ''}>&{'Open'}</option>
+                            <option value="Closed" ${status == "Closed" ? 'selected' : ''}>&{'Closed'}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                        <input type="text" class="form-control"
+                               placeholder="&{'Search'}!" name="keyword" value="${keyword}"/>
+                        <input type="hidden" name="CurrentPageNumber" value="1"/>
+                    </div>
+                    <div class="col-md-2" style="padding: 0;">
+                        <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                    </div>
+                    <div class="col-md-2" style="float: right; padding-right: 0!important;">
+                        <button type="button" id="filter-minus" class="btn btn-effect btn-primary"
+                                style="float: right;width: 110px">
+                            <i class="fa fa-search-minus p-r-10"></i>&{'Filter'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+#{if status == "Open"}
+    <div class="row">
+        <div class="col-md-12">
+            <div style="border-radius: 3px; padding-left: 1%; height: 34px; font-size: 13px;
+                    line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+                <span style="float: left;">&{'OpenRFIs'} (&{'Overdue'}: ${overdue},  &{'ThisWeek'}: ${weeker})</span>
+                <span style="float: right; margin-right: 1%">
+                    <i class="fa fa-square" style="color: red"></i> - &{'Overdue'}
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="padding-bottom: 10px!important"></div>
+#{/if}
+    <div class="row" style="margin-top: 0!important; padding-top: 0!important;">
+        <div class="col-md-12 col-sm-12 col-xs-12 table-responsive">
+            <table id="posts-table" class="table table-tools table-striped"
+                   style="font-size: 13px!important; margin-top: 0!important;">
+                <thead>
+                <tr>
+                    <th id="id" class="text-center" style="width: 29px">
+                        #
+                    </th>
+                    <th width="auto">
+                    &{'Subject'}
+                    </th>
+                    <th style="width: 250px">
+                    &{'Assignee'}
+                    </th>
+                    <th class="text-center" style="width: 170px">
+                    &{'CreatedDate'}
+                    </th>
+                    <th class="text-center" style="width: 175px">
+                        &{status=="Closed" ? 'ClosedDate' : 'DueDate'}
+                    </th>
+                    <th class="text-center" style="width: 30px;">
+
+                    </th>
+                #{if status == "Draft"}
+                    <th class="text-center" style="width: 40px;">
+
+                    </th>
+                #{/if}
+                </tr>
+                </thead>
+                <tbody style="font-weight: 500">
+                #{list items:rfis, as:'rfi'}
+                <tr onclick="${rfi.rfi_status.status == "Draft" ? 'edit(' + rfi.id + ')' : 'show(' + rfi.id + ')'}"
+                    class="${rfi.rfi_status.status == "Open" ? (!now.after(rfi.dueDate) ? (week.after(rfi.dueDate) ? "warning" : "black") : "danger") : "black"}"
+                    title="&{rfi.rfi_status.status == "Draft" ? 'EditRFI' : 'ViewRFI'}">
+                    <td>${rfi.id}</td>
+                    <td>${rfi.subject}</td>
+                    <td>${rfi.assignee.getLastnameFirstCharacter()}. ${rfi.assignee.firstName}
+                        <span> (${rfi.assignee.userTeam.name})</span>
+                    </td>
+                    <td class="text-center">${rfi.createDate.format("yyyy-MM-dd")}</td>
+                    <td class="text-center">${status=="Closed" ? rfi.closedDate.format("yyyy-MM-dd") : rfi.dueDate.format("yyyy-MM-dd")}</td>
+                    <td style="width: 20px">
+                        #{if rfi.rfi_attaches.size()}
+                            <div class="post-images">
+                            ${controllers.Functions.handleDocumentAttachment(rfi.rfi_attaches.get(0).dir,rfi.rfi_attaches.get(0).name,rfi.rfi_attaches.get(0).extension).raw()}
+                            </div>
+                        #{/if}
+                    </td>
+                    #{if status == "Draft"}
+                        <td style="text-align: center;" class="text-center mClass">
+                            #{if rfi.rfi_status.status == "Draft"}
+                                <a href="@{RFIs.edit(rfi.id)}" data-original-title="&{'Edit'}" data-rel="tooltip"
+                                   class="edit btn btn-sm btn-icon btn-rounded btn-default">
+                                    <i class="fa fa-pencil" style="margin-top: 6px"></i>
+                                </a>
+                            #{/if}
+                        </td>
+                    #{/if}
+                </tr>
+                #{/list}
+                </tbody>
+            </table>
+
+            <form id="pageForm" class="dhidden" action="@{RFIs.list()}" method="get">
+                <input type="hidden" name="assignee" value="${assignee}"/>
+                <input type="hidden" name="tasky" value="${tasky}"/>
+                <input type="hidden" name="status" value="${status}"/>
+                <input type="hidden" name="keyword" value="${keyword}"/>
+                <input type="hidden" id="PageNumber" name="CurrentPageNumber" value="${CurrentPageNumber}"/>
+            </form>
+
+            <div class="page-navigation" style="width: 100%; text-align: right;">
+            %{
+                int threeDots = 0;
+                for(int i = 1; i <= MaxPageNumber; i++){
+                if( i == 1 || i == MaxPageNumber || (CurrentPageNumber < 3 && i < 5) ||
+                (CurrentPageNumber - 1 <= i && i <= CurrentPageNumber + 1) ||
+                (CurrentPageNumber > MaxPageNumber - 2 && i > MaxPageNumber - 4) ){
+                }%
+                <input class="number-button btn btn-${CurrentPageNumber == i ? 'dark':'default'}"
+                       style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                       type="button"
+                       value="${i}"/>
+            %{ }else{
+                if( i == 2 || i == MaxPageNumber - 1 ){
+                threeDots = 1;
+                }
+                if(threeDots == 1){
+                }%
+                <span style="font-size: x-large;"><strong>...</strong></span>
+            %{
+                threeDots = 0;
+                }
+                }
+                }
+                }%
+            </div>
+        </div>
+    </div>
+</div>
+<div class="notification btn-success dhidden">
+    <h4><i class='fa fa-check-square-o' style='padding-right:6px'></i>${flash.success}</h4>
+</div>
+<div class="md-overlay"></div>
+#{ImgThumbnail div:'div.post-images'/}
+#{rfis-config /}
+
+<script>
+    $(window).load(function () {
+    #{if flash.success}
+        notificationOn();
+    #{/if}
+    });
+    function notificationOn() {
+        $("div.notification").removeClass("dhidden");
+        $("div.notification").addClass("notfOn");
+        setTimeout(function () {
+            $("div.notification").removeClass("notfOn");
+        }, 2000);
+        setTimeout(function () {
+            $("div.notification").addClass("dhidden");
+        }, 2500);
+    }
+    var idSort = 0;
+    $("th#id").click(function () {
+        if (!idSort) {
+            var wid = $("th#id").css('width');
+            $("th#id").css('width', (parseInt(wid.substr(0, wid.length - 2)) + 7) + wid.substr(wid.length - 2, 2));
+            idSort++;
+        }
+    });
+    $(".page-navigation input.number-button").click(function () {
+        var obj = $(this);
+        if ($("#PageNumber").val() != obj.val()) {
+            $("#PageNumber").val(obj.val());
+            $("#pageForm").submit();
+        }
+    });
+    $(document).ready(function () {
+        var opt = {};
+        // Tools: export to Excel, CSV, PDF & Print
+        opt.sDom = "",
+                opt.oLanguage = {"sSearch": "", "sZeroRecords": "Үр дүн байхгүй байна."} ,
+                opt.oTableTools = {
+                    "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": ["pdf"]
+                };
+        opt.aaSorting = [[3, 'desc']];
+        opt.aoColumnDefs = [
+            {'bSortable': false, 'aTargets': [5 ${status == "Draft" ? ',6': ''}]}
+        ];
+
+        var oTable = $('#posts-table').dataTable(opt);
+        oTable.fnDraw();
+
+        /* Add a placeholder to search input */
+        $('.dataTables_filter input').attr("placeholder", "Search an article...");
+
+    });
+    #{if status != "Draft"}
+    function show(id) {
+        window.location.href = "rfiShow?id=" + id;
+    }
+    #{/if}
+    #{else}
+    function edit(id) {
+        window.location.href = "rfiEdit?id=" + id;
+    }
+    #{/else}
+    $("button#filter-plus").click(function () {
+        $("div#status-row").addClass("dhidden");
+        $("div#filter-row").removeClass("dhidden");
+        $("div.tengu").removeClass("kamikaze");
+    });
+    $("button#filter-minus").click(function () {
+        $("div#status-row").removeClass("dhidden");
+        $("div#filter-row").addClass("dhidden");
+        $("div.tengu").addClass("kamikaze");
+    });
+</script>

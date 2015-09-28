@@ -1,0 +1,39 @@
+#{extends 'CRUD/layout.html' /}
+#{fancybox-config /}
+#{checkFileExtension /}
+
+<a href="@{controllers.SampleDocs.blank()}" class="blueButton">Шинээр нэмэх</a>
+
+<table border="0" cellspacing="0" cellpadding="0">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Текст</th>
+        <th>Огноо</th>
+        <th>Файл</th>
+        <th>&{'operation'}</th>
+    </tr>
+    </thead>
+%{count=1}%
+    <tbody>
+    #{list items:sampleDocs,as:'doc'}
+    <tr class=${count%2==0?'odd':''}>
+        <td>${count}</td>
+        <td>${doc.documentText.raw()}</td>
+        <td>${doc.createdDate.format('yyyy-MM-dd')}</td>
+        <td>
+            #{if doc.docAttaches.size()>0}
+                <div class="post-images">
+                    #{list items:doc.docAttaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension).raw()}
+                    #{/list}
+                </div>
+            #{/if}
+        </td>
+        <td><a href="@{controllers.SampleDocs.show(doc.id)}">&{'edit'}</a></td>
+    %{count++}%
+    </tr>
+    #{/list}
+    </tbody>
+</table>
+#{ImgThumbnail div:'div.post-images'/}

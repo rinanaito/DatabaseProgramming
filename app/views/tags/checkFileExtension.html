@@ -1,0 +1,57 @@
+<script type="text/javascript">
+
+    var imageFileExtensions = "${controllers.Consts.imageFileExtensions}",
+            imageFileIcon = "${controllers.Consts.imageFileIcon}",
+            pdfFileExtensions = "${controllers.Consts.pdfFileExtensions}",
+            pdfFileIcon = "${controllers.Consts.pdfFileIcon}",
+            wordFileExtensions = "${controllers.Consts.wordFileExtensions}",
+            wordFileIcon = "${controllers.Consts.wordFileIcon}",
+            excelFileExtensions = "${controllers.Consts.excelFileExtensions}",
+            excelFileIcon = "${controllers.Consts.excelFileIcon}",
+            powerPointFileExtensions = "${controllers.Consts.powerPointFileExtensions}",
+            powerPointFileIcon = "${controllers.Consts.powerPointFileIcon}",
+            autoCadFileExtensions = "${controllers.Consts.autoCadFileExtensions}",
+            autoCadFileIcon = "${controllers.Consts.autoCadFileIcon}",
+            videoFileExtensions = "${controllers.Consts.videoFileExtensions}",
+            videoFileIcon = "${controllers.Consts.videoFileIcon}",
+            viewableVideoExtensions = "${controllers.Consts.viewableVideoExtensions}",
+            viewableVideoIcon = "${controllers.Consts.viewableVideoIcon}",otherFileIcon = "${controllers.Consts.otherFileIcon}";
+    var imageFile = "${controllers.Consts.imageFileType}",wordFile = "wordFile", excelFile = "excelFile",pdfFile = "pdfFile",cadFile = "cadFile",
+            powerPointFile = "powerPointExtension", videoFile = "video",
+            viewableVideoFile = "${controllers.Consts.viewableVideoType}",otherFile = "other";
+    var checkFileExtensionTumb = function(filename) {
+        try {
+            filename = filename.split(".");
+            return (filename[filename.length - 2] + "t.jpg");
+        } catch(e) {
+        }
+    }
+    var checkFileExtension = function(ext) {
+        try {
+
+            if (imageFileExtensions.indexOf(ext) != -1) {
+                return imageFile;
+            } else if (pdfFileExtensions.indexOf(ext) != -1) {
+                return pdfFile;
+            } else if (wordFileExtensions.indexOf(ext) != -1) {
+                return wordFile;
+            } else if (excelFileExtensions.indexOf(ext) != -1) {
+                return excelFile;
+            } else if (powerPointFileExtensions.indexOf(ext) != -1) {
+                return powerPointFile;
+            } else if (autoCadFileExtensions.indexOf(ext) != -1) {
+                return cadFile;
+            } else if (videoFileExtensions.indexOf(ext) != -1) {
+                return videoFile;
+            } else if (viewableVideoExtensions.indexOf(ext) != -1) {
+                return viewableVideoFile;
+            }
+
+        } catch(e) {
+        }
+
+        return otherFile;
+
+    };
+
+</script>

@@ -1,0 +1,475 @@
+#{extends 'CRUD/layout.html' /}
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+<script type="text/javascript">
+    $(function () {
+        $("#menuPopup").menu();
+        $("div#myDialog").dialog({
+            autoOpen: false
+        });
+    });
+    function closeDialog() {
+        $("div#myDialog").dialog('close');
+    }
+</script>
+
+<ul id="menuPopup" style="position: absolute;left: -1000px">
+    <li id="menuitem-1" mi="1">&{'projectObject'} нэмэх</li>
+    <li id="menuitem-2" mi="2">&{'Task'} нэмэх</li>
+    <li id="menuitem-3" mi="3">Нэр өөрчлөх</li>
+    <li id="menuitem-4" mi="4">Хувилах</li>
+    <li id="menuitem-5" mi="5">Устгах</li>
+</ul>
+<div id="myDialog">
+    <table border="0" cellpadding="0" cellspacing="0" style="width:100%;">
+        <tr>
+            <td colspan="2" style="text-align: center" id="askText"></td>
+        </tr>
+        <tr id="inputTextTr">
+            <td colspan="2" style="text-align: center">
+                <input type="text" id="inputText" style="width: 100%"/>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center"><input type="button" value="Болих" onclick="closeDialog()"/></td>
+            <td style="text-align: center"><input id=actionButton type="button" value=""/></td>
+        </tr>
+    </table>
+</div>
+<div id="divMain">
+    <table id=mainScroll cellpadding="0" cellspacing="0">
+        <tr>
+            <td><span style="margin: 0 4px">Төсөл сонгох:</span>
+                <select name="" id="selectProject" style="margin-left: 4px">
+                    <option value="0"></option>
+                #{list items:projects,as:'project'}
+                    <option value="${project.id}">${project.name}</option>
+                #{/list}
+                </select>
+            </td>
+            <td>
+                <table border="0" id="dateDiv" style="width: 400px;border: none">
+                    <tr>
+                        <td><input type="radio" stype="Day" name="radioGroup" checked/><span>Өдрөөр</span></td>
+                        <td><input type="radio" stype="Week" name="radioGroup"/><span>Долоо хоногоор</span></td>
+                        <td><input type="radio" stype="Month" name="radioGroup"/><span>Сараар</span></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td class="contain" style="width: 10%" valign="top">
+                <div class="divCon" id=con-1 style="width: 500px;overflow-x: scroll">
+                    <table cellpadding="0" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>&nbsp;</th>
+                            <th>&nbsp;</th>
+                            <th>&nbsp;</th>
+                            <th>&nbsp;</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                        <tr>
+                            <th rowspan="2" style="width: 200px;height: 33px">Нэр</th>
+                            <th rowspan="2" style="width: 80px">&{'startDate'}</th>
+                            <th rowspan="2" style="width: 80px">&{'finishDate'}</th>
+                            <th rowspan="2">&{'duration'}</th>
+                            <th rowspan="2">&{'owner'}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        %{count=1;}%
+                        <tr id="p-${project.id}" class="${count%2==0?'even':'odd'}">
+                            <td class="noselect showmenu" type="project"><label><span>${project.name}</span></label>
+                            </td>
+                            <td class="startDate">${project.startDate?.format("yyyy-MM-dd")}</td>
+                            <td class="finishDate">${project.finishDate?.format("yyyy-MM-dd")}</td>
+                            <td class="duration">${project.duration}</td>
+                            <td style="text-align: center!important;">
+                                <a class="selectInfoView2" oid="${project.owner.id}" type="User"
+                                   sid=2>${project.owner.firstName}.${project.owner.getLastnameFirstCharacter()}</a>
+                            </td>
+                        </tr>
+                        %{count++;}%
+                        #{list items:projectObjects,as:'object'}
+                        <tr id=o-${object.id} class="${count%2==0?'even':'odd'}">
+                            <td class="noselect showmenu" type="object"><span>${object.name}</span></td>
+                            <td class="startDate">${object.startDate?.format("yyyy-MM-dd")}</td>
+                            <td class="finishDate">${object.finishDate?.format("yyyy-MM-dd")}</td>
+                            <td class="duration">${object.duration}</td>
+                            <td style="text-align: center!important;">
+                                <a class="selectInfoView2" oid="${object.owner.id}" type="User"
+                                   sid=2>${object.owner.firstName}.${object.owner.getLastnameFirstCharacter()}</a>
+                            </td>
+                        </tr>
+                        %{count++}%
+                            #{list items:object.taskGroups,as:'taskGroup'}
+                            <tr id=g-${taskGroup.id} class="${count%2==0?'even':'odd'}">
+                                <td class="noselect showmenu" type="taskGroup"><span
+                                        style="margin-left: 15px">${taskGroup.name}</span></td>
+                                <td class="startDate">${taskGroup.startDate?.format("yyyy-MM-dd")}</td>
+                                <td class="finishDate">${taskGroup.finishDate?.format("yyyy-MM-dd")}</td>
+                                <td class="duration">${taskGroup.duration}</td>
+                                <td style="text-align: center!important;">
+                                    <a class="selectInfoView2" oid="${taskGroup.owner.id}" type="User"
+                                       sid=2>${taskGroup.owner.firstName}
+                                        .${taskGroup.owner.getLastnameFirstCharacter()}</a>
+                                </td>
+                            </tr>
+                            %{count++}%
+                                #{list items:taskGroup.tasks,as:'task'}
+                                <tr id=t-${task.id} class="${count%2==0?'even':'odd'}">
+                                    <td class="noselect showmenu" type="task"><span
+                                            style="margin-left: 30px">${task.name}</span></td>
+                                    <td class="startDate">${task.startDate?.format("yyyy-MM-dd")}</td>
+                                    <td class="finishDate">${task.finishDate?.format("yyyy-MM-dd")}</td>
+                                    <td class="duration">${task.duration}</td>
+                                    <td style="text-align: center!important;">
+                                        <a class="selectInfoView2" oid="${task.owner.id}" type="User"
+                                           sid=2>${task.owner.firstName}
+                                            .${task.owner.getLastnameFirstCharacter()}</a>
+                                    </td>
+                                </tr>
+                                %{count++;floorCount=0;}%
+                                    #{list items:object.floors,as:'floor'}
+                                    <tr id=f-${task.id}-${floor.id}
+                                        class="${count%2==0?'even':'odd'}">
+                                        <td class="noselect showmenu" type="floor"><span
+                                                style="margin-left: 45px">${floor.name}</span></td>
+                                    %{
+                                        taskFloorRel=task.getRel(floor.id);
+                                        if(taskFloorRel!=null){}%
+                                        <td class="floor startDate" tobj="startDate"
+                                            id="startDate-${task.id}-${floor.id}"
+                                            tid=${task.id} fid=${floor.id}>${taskFloorRel.startDate?.format("yyyy-MM-dd")}</td>
+                                        <td class="floor finishDate" tobj="finishDate"
+                                            id="finishDate-${task.id}-${floor.id}"
+                                            tid=${task.id} fid=${floor.id}>${taskFloorRel.finishDate?.format("yyyy-MM-dd")}</td>
+                                        <td class="duration" id="duration-${task.id}-${floor.id}">
+                                        ${taskFloorRel.duration}</td>
+                                    %{}else{}%
+                                        <td class="floor startDate" tobj="startDate"
+                                            id="startDate-${task.id}-${floor.id}"
+                                            tid=${task.id} fid=${floor.id}></td>
+                                        <td class="floor finishDate" tobj="finishDate"
+                                            id="finishDate-${task.id}-${floor.id}"
+                                            tid=${task.id} fid=${floor.id}></td>
+                                        <td class="duration" id="duration-${task.id}-${floor.id}"></td>
+
+                                    %{};count++;floorCount++;}%
+                                        <td></td>
+                                    </tr>
+                                    #{/list}
+                                #{/list}
+                            #{/list}
+                        #{/list}
+                        </tbody>
+                    </table>
+                </div>
+            </td>
+            <td valign="top" id="td-2">
+                <div class="divCon" id=con-2 style="width: 500px;overflow-x: scroll">
+                #{include "/Projects/ganttChart${stype}.html"/}
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+#{include "SharedView/SelectorInfoDialog2.html" /}
+<div style="visibility: hidden">
+    <div id="d_startDate"><input type="text" id="object_startDate"/></div>
+    <div id="d_finishDate"><input type="text" id="object_finishDate"/></div>
+    <div id="d_duration"><input type="text" id="object_duration"/></div>
+</div>
+#{datepicker-configTr /}
+<style type="text/css">
+    div#divMain {
+        box-shadow: 0 0 3px black;
+        border-radius: 4px;
+        background-color: #ffffff;
+        min-height: 600px;
+    }
+
+    table#mainScroll td.contain div.divCon {
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    table#mainScroll td.contain {
+        padding: 0 !important;
+    }
+
+    div#divMain table#mainScroll td {
+        padding: 0 1px !important;
+    }
+
+    table#mainScroll div.divCon tr td {
+        border: 1px solid #eee !important;
+        font-size: 12px;
+        white-space: nowrap;
+        border-bottom: none !important;
+    }
+
+    table#mainScroll td {
+        border: none !important;
+    }
+
+    table#mainScroll thead tr th {
+        text-align: center !important;
+        padding: 0 !important;
+        border: 1px solid #ddd;
+        border-left: none !important;
+        border-bottom: none !important;
+        border-right: 1px solid #ddd !important;
+        line-height: 16px;
+        text-shadow: none !important;
+        font-size: 12px;
+    }
+
+    table#mainScroll div.divCon tr td label {
+        width: 10%;
+        margin-left: 2px;
+    }
+
+    table#mainScroll div#con-1 tr td.floor {
+        cursor: pointer;
+        text-align: center !important;
+    }
+
+    table#mainScroll div#con-1 td.startDate,
+    table#mainScroll div#con-1 td.finishDate,
+    table#mainScroll div#con-1 td.duration {
+        text-align: center !important;
+    }
+
+    table#mainScroll div#con-2 th {
+        font-weight: normal !important;
+        width: 22px;
+    }
+
+    table#mainScroll div#con-2 tr#dayName th {
+        font-size: 10px;
+    }
+
+    table#mainScroll div#con-2 th.weekend {
+        background-color: orange;
+    }
+
+    table#mainScroll div#con-2 td.selected {
+        height: 21px;
+    }
+
+    table#mainScroll div#con-2 td.weekend {
+        background-color: aliceblue;
+    }
+
+    table#mainScroll div#con-2 td.selected div {
+        background-repeat: repeat-x;
+        height: 10px;
+        width: 100%;
+        cursor: pointer;
+        /*box-shadow: 0 0 2px black;*/
+        border-radius: 5px;
+    }
+
+    table#mainScroll div#con-2 tr.project td.selected div {
+        background-image: url("/public/images/bars/bar4.png");
+    }
+
+    table#mainScroll div#con-2 tr.object td.selected div {
+        background-image: url("/public/images/bars/bar2.png");
+    }
+
+    table#mainScroll div#con-2 tr.taskGroup td.selected div {
+        background-image: url("/public/images/bars/bar1.png");
+    }
+
+    table#mainScroll div#con-2 tr.task td.selected div {
+        background-image: url("/public/images/bars/bar5.png");
+    }
+
+    table#mainScroll div#con-2 tr.floor td.selected div {
+        background-image: url("/public/images/bars/bar3.png");
+    }
+
+    table#mainScroll div.divCon tr.mouseenter td {
+        background-color: #fff9bc !important;
+    }
+
+    table#dateDiv span {
+        font-size: 12px;
+    }
+
+    .ui-menu {
+        width: 150px;
+    }
+
+    table#mainScroll td.showmenu span {
+        cursor: pointer;
+    }
+
+    div#myDialog td {
+        padding: 10px 8px;
+    }
+</style>
+<script type="text/javascript">
+    $('div#divMain select#selectProject').change(function () {
+
+    });
+    $('table#mainScroll div#con-2').css('width', $('table#mainScroll td#td-2').width());
+    var o_sel_tid, o_sel_fid;
+    $('table#mainScroll div.divCon td input').on('click', function () {
+        $(this).parent().find('img').click();
+    });
+    $('table#mainScroll div.divCon tr td.floor').on('click', function () {
+        var offset = $(this).offset();
+        o_sel_tid = $(this).attr('tid');
+        o_sel_fid = $(this).attr('fid');
+        $("div#d_startDate input").val($(this).parent().find('#startDate-' + o_sel_tid + '-' + o_sel_fid).html());
+        $('div#d_finishDate input').val($(this).parent().find('#finishDate-' + o_sel_tid + '-' + o_sel_fid).html());
+        $('div#d_duration input').val($(this).parent().find('#duration-' + o_sel_tid + '-' + o_sel_fid).html());
+        setMinDate(getDate("div#d_startDate input"));
+        $("div#d_" + $(this).attr('tobj')).offset({top: offset.top, left: offset.left}).find('img').click();
+
+    });
+    function setDateValue() {
+        var d_startDate = $("div#d_startDate input").val();
+        var d_finishDate = $("div#d_finishDate input").val();
+        var d_duration = $("div#d_duration input").val();
+        $('table#mainScroll div.divCon tr td#startDate-' + o_sel_tid + '-' + o_sel_fid).html(d_startDate);
+        $('table#mainScroll div.divCon tr td#finishDate-' + o_sel_tid + '-' + o_sel_fid).html(d_finishDate);
+        $('table#mainScroll div.divCon tr td#duration-' + o_sel_tid + '-' + o_sel_fid).html(d_duration);
+        if (d_startDate != null && d_startDate != undefined && d_startDate.length > 0 &&
+                d_finishDate != null && d_finishDate != undefined && d_finishDate.length > 0 &&
+                d_duration != null && d_duration != undefined && d_duration.length > 0) {
+            $.ajax({
+                type: "POST",
+                data: {
+                    tid: o_sel_tid,
+                    fid: o_sel_fid,
+                    startDate: d_startDate,
+                    finishDate: d_finishDate,
+                    duration: d_duration,
+                    stype: $('table#dateDiv input:checked').attr('stype')
+                },
+                url: "/setProjectDateVal"
+            }).success(
+                    function (data) {
+                        $("table#mainScroll div#con-2").html(data);
+                    });
+        }
+    }
+    function changeGanttStype(stype) {
+        $.ajax({
+            type: "POST",
+            data: {tid: ${project.id}, stype: stype},
+            url: "/setProjectDateVal"
+        }).success(
+                function (data) {
+                    $("table#mainScroll div#con-2").html(data);
+                });
+    }
+    $("table#mainScroll div#con-1 tbody tr").mouseenter(
+            function () {
+                $("table#mainScroll div#con-2 tr#" + $(this).attr('id')).addClass('mouseenter');
+                $(this).addClass('mouseenter');
+            }).mouseleave(function () {
+                $("table#mainScroll div#con-2 tr#" + $(this).attr('id')).removeClass('mouseenter');
+                $(this).removeClass('mouseenter');
+            });
+    $("table#mainScroll div#con-2 tbody tr").mouseenter(function () {
+        $("table#mainScroll div#con-1 tr#" + $(this).attr('id')).addClass('mouseenter');
+        $(this).addClass('mouseenter');
+    }).mouseleave(function () {
+        $("table#mainScroll div#con-1 tr#" + $(this).attr('id')).removeClass('mouseenter');
+        $(this).removeClass('mouseenter');
+    });
+    $("table#dateDiv input:radio").change(function () {
+//        $("table#dateDiv input:checkbox").attr("checked", false);
+//        $(this).prop( "checked" )
+        changeGanttStype($(this).attr("stype"));
+    });
+
+    $("table td a.selectInfoView2").mouseenter(function () {
+        var aPos = $(this).offset(), ctTop, ctLef;
+        var sui = $("div#selector-info2");
+
+        ctTop = (aPos.top + 20);
+        ctLef = (aPos.left );
+
+        sui.css('top', ctTop + "px");
+        sui.css('left', ctLef + "px");
+        sui.show();
+        loadSelectorInfo2($(this).attr('oid'), $(this).attr('type'));
+
+    }).mouseleave(function () {
+        $("div#selector-info2").hide();
+        cancelSelectorInfo2();
+    });
+    var selectedTreeName;
+    $("table#mainScroll td.showmenu").on('click', function () {
+        var obj = $('ul#menuPopup');
+        selectedTreeName = $(this).find('span').text();
+        if ($(this).attr('type') == "project") {
+            obj.find('#menuitem-1').removeClass('ui-state-disabled');
+            obj.find('#menuitem-2').addClass('ui-state-disabled');
+            obj.find('#menuitem-4').addClass('ui-state-disabled');
+            obj.find('#menuitem-5').addClass('ui-state-disabled');
+        } else {
+            obj.find('#menuitem-1').addClass('ui-state-disabled');
+            obj.find('#menuitem-2').removeClass('ui-state-disabled');
+            obj.find('#menuitem-4').removeClass('ui-state-disabled');
+            obj.find('#menuitem-5').removeClass('ui-state-disabled');
+        }
+        obj.offset({
+            top: $(this).find('span').offset().top + 18,
+            left: $(this).find('span').offset().left
+        });
+    });
+    $('ul#menuPopup').mouseleave(function () {
+        $(this).offset({
+            top: 0,
+            left: -1000
+        });
+    });
+    $("ul#menuPopup li").on('click', function () {
+        if (!$(this).hasClass('ui-state-disabled')) {
+            var obj = $("div#myDialog");
+            if ($(this).attr('mi') == 1) {
+                obj.find('#actionButton').val("Нэмэх");
+                obj.find("#askText").html(selectedTreeName + "-д объект нэмэх үү?");
+                obj.find("#inputText").val("");
+                obj.find("#inputTextTr").removeClass('dhidden');
+            }
+            if ($(this).attr('mi') == 2) {
+                obj.find('#actionButton').val("Нэмэх");
+                obj.find("#askText").html(selectedTreeName + "-д ажил нэмэх үү?");
+                obj.find("#inputText").val("");
+                obj.find("#inputTextTr").removeClass('dhidden');
+            } else if ($(this).attr('mi') == 3) {
+                obj.find('#actionButton').val("Өөрчлөх");
+                obj.find("#askText").html("Нэр?");
+                obj.find("#inputText").val(selectedTreeName);
+                obj.find("#inputTextTr").removeClass('dhidden');
+            } else if ($(this).attr('mi') == 4) {
+                obj.find('#actionButton').val("Хувилах");
+                obj.find("#askText").html(selectedTreeName + "-г хувилах уу?");
+                obj.find("#inputText").val("");
+                obj.find("#inputTextTr").addClass('dhidden');
+            } else if ($(this).attr('mi') == 5) {
+                obj.find('#actionButton').val("Устгах");
+                obj.find("#askText").html(selectedTreeName + "-г устгах уу?");
+                obj.find("#inputText").val("");
+                obj.find("#inputTextTr").addClass('dhidden');
+            }
+            obj.dialog("option", "position", {
+                my: "left top",
+                at: "left top",
+                of: $(this).parent()
+            }).dialog("open");
+            $(this).parent().offset({
+                top: 0,
+                left: -1000
+            });
+        }
+    });
+</script>

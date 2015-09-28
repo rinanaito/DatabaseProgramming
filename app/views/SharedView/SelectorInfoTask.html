@@ -1,0 +1,57 @@
+<div id="selector-info-task" style="display:none;width: auto;"><img src="&{'/public/images/ajax-loader-h.gif'}"
+                                                               id="loadingSelectTaskInfoImage"></div>
+<script type="text/javascript">
+    var sui2 = $("#selector-info-task");
+     var loadingSelectTaskInfoImage =
+    #{jsAction @FunctionController.getSelectorInfo(":id",":stype",":type1") /}
+    var loadSelectorRequest2;
+    $("table#selectInfo td a.selectInfoView").bind('mouseenter',
+            function() {
+                var aPos = $(this).offset();
+                sui2.css('top', (aPos.top  + 12) + "px");
+                sui2.css('left', aPos.left  + "px");
+                var stype;
+                if ($(this).attr('type') == 0)stype = 'Manpower';
+                else stype = 'Equipment';
+                sui2.show();
+                loadSelectorInfo2($(this).attr('oid'), stype, "selector");
+            }).bind('mouseleave', function() {
+                sui2.hide();
+                cancelSelectorInfo2();
+            });
+    function loadSelectorInfo2(id, stype, type1) {
+        removeSelectorLoading2();
+        loadSelectorRequest2 = $.post(loadingSelectTaskInfoImage({id:id, stype:stype, type1:type1}), function(data) {
+            $("#loadingSelectTaskInfoImage").hide();
+            $("#selector-info-task").append(data);
+        });
+    }
+    function cancelSelectorInfo2() {
+        loadSelectorRequest2.abort();
+        removeSelectorLoading2();
+    }
+    function removeSelectorLoading2() {
+        $("#selector-info-task").find("#selector-info-table").remove();
+        $("#loadingSelectTaskInfoImage").show();
+    }
+</script>
+
+<style type="text/css">
+    #selector-info-task {
+        background: #333;
+        box-shadow: 0 0 8px black;
+        border: 1px solid black;
+        border-radius: 4px;
+        position: absolute;
+        width: 240px;
+        height: auto;
+        min-height: 30px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 1px 0 #727272 inset;
+        color: #d3d3d3;
+    }
+
+    #selector-info-task > img {
+        margin-left: 15px;
+        margin-top: 10px;
+    }
+</style>

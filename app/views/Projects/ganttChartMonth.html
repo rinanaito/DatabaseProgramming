@@ -1,0 +1,108 @@
+%{
+if (project.duration!=null)widthTable=22*months.size();
+widthTable++;}%
+<table cellpadding="0" cellspacing="0" pp=${months.size()} style="width: ${widthTable}px;">
+<thead>
+<tr>
+#{list items:years,as:'year'}
+    <th colspan="${year.merge}">&nbsp;</th>
+#{/list}
+</tr>
+<tr>
+#{list items:years,as:'year'}
+    <th colspan="${year.merge}">${year.name}</th>
+#{/list}
+</tr>
+<tr>
+#{list items:months,as:'month'}
+    <th>${month.month+1}</th>
+#{/list}
+</tr>
+</thead>
+<tbody>
+%{count=1;}%
+<tr id=p-${project.id} class="project ${count%2==0?'even':'odd'}">
+#{list items:months,as:'month'}
+%{
+    rangeVal=controllers.Functions.monthRange(project.startDate,project.finishDate,month.date,month.month,month.merge);
+    if(rangeVal.val==1){}%
+    <td class=selected colspan="${rangeVal.length}">
+        <div title="${project.name}">&nbsp;</div>
+    </td>
+%{}else if(rangeVal.val==0){}%
+    <td>&nbsp;</td>
+%{}}%
+#{/list}
+</tr>
+%{count++;}%
+#{list items:projectObjects,as:'object'}
+<tr id=o-${object.id} class="object ${count%2==0?'even':'odd'}">
+    #{list items:months,as:'month'}
+    %{
+        rangeVal=controllers.Functions.monthRange(object.startDate,object.finishDate,month.date,month.month,month.merge);
+        if(rangeVal.val==1){}%
+        <td class=selected colspan="${rangeVal.length}">
+            <div title="${object.name}">&nbsp;</div>
+        </td>
+    %{}else if(rangeVal.val==0){}%
+        <td>&nbsp;</td>
+    %{}}%
+    #{/list}
+</tr>
+%{count++}%
+    #{list items:object.taskGroups,as:'taskGroup'}
+    <tr id=g-${taskGroup.id} class="taskGroup ${count%2==0?'even':'odd'}">
+        #{list items:months,as:'month'}
+        %{
+            rangeVal=controllers.Functions.monthRange(taskGroup.startDate,taskGroup.finishDate,month.date,month.month,month.merge);
+            if(rangeVal.val==1){}%
+            <td class=selected colspan="${rangeVal.length}">
+                <div title="${taskGroup.name}">&nbsp;</div>
+            </td>
+        %{}else if(rangeVal.val==0){}%
+            <td>&nbsp;</td>
+        %{}}%
+        #{/list}
+    </tr>
+    %{count++}%
+        #{list items:taskGroup.tasks,as:'task'}
+        <tr id=t-${task.id} class="task ${count%2==0?'even':'odd'}">
+            #{list items:months,as:'month'}
+            %{
+                rangeVal=controllers.Functions.monthRange(task.startDate,task.finishDate,month.date,month.month,month.merge);
+                if(rangeVal.val==1){}%
+                <td class=selected colspan="${rangeVal.length}">
+                    <div title="${task.name}">&nbsp;</div>
+                </td>
+            %{}else if(rangeVal.val==0){}%
+                <td>&nbsp;</td>
+            %{}}%
+            #{/list}
+        </tr>
+        %{count++}%
+            #{list items:object.floors,as:'floor'}
+            <tr id=f-${task.id}-${floor.id} class="floor ${count%2==0?'even':'odd'}">
+            %{
+                taskFloorRel=task.getRel(floor.id);
+                if(taskFloorRel!=null){
+                for(controllers.MyClass.MyMonth month:months){
+                rangeVal=controllers.Functions.monthRange(taskFloorRel.startDate,taskFloorRel.finishDate,month.date,month.month,month.merge);
+                if(rangeVal.val==1){}%
+                <td class=selected colspan="${rangeVal.length}">
+                    <div title="${taskFloorRel.task.name} - ${taskFloorRel.floor.name}">&nbsp;</div>
+                </td>
+            %{}else if(rangeVal.val==0){}%
+                <td>&nbsp;</td>
+            %{}}
+                }else{}%
+                #{list items:months,as:'month'}
+                    <td>&nbsp;</td>
+                #{/list}
+            %{};count++}%
+            </tr>
+            #{/list}
+        #{/list}
+    #{/list}
+#{/list}
+</tbody>
+</table>

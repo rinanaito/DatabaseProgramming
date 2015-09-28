@@ -1,0 +1,5 @@
+<ul>
+    #{list items:userTeams,as:'userTeam'}
+    <li id="t-${userTeam.id}" type="t" onclick="selectSentUserLi(${userTeam.id},'t')">${userTeam.name}(${userTeam.userEng})</li>
+    #{/list}
+</ul>

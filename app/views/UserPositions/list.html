@@ -1,0 +1,37 @@
+#{extends 'CRUD/layout.html' /}
+
+<div id="crudList" class="${type.name}">
+    <div id="crudListContainer">
+        <div id="crudListSearch">
+            <p id="crudListAdd">
+                <a href="@{blank()}">&{'crud.add', type.modelName}</a>
+            </p>
+            #{crud.search /}
+
+        </div>
+
+        <div id="crudListTable">
+            #{crud.table
+            fields:['name','rate','Users','Description'],sort:['name','rate'],functionName:functionName,functionArguments:functionArguments}
+
+            #{crud.custom 'UserPositions'}
+            <a href="@{show(object.id)}">${object.name}</a>
+            #{/crud.custom}
+
+            #{crud.custom 'Users'}
+            ${object.users.size()}
+            #{/crud.custom}
+
+            #{crud.custom 'Description'}
+            ${object.description}
+            #{/crud.custom}
+
+            #{/crud.table }
+        </div>
+
+        <div id="crudListPagination">
+            #{crud.pagination /}
+        </div>
+    </div>
+
+</div>

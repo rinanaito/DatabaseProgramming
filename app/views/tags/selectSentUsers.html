@@ -1,0 +1,155 @@
+<script>
+    function sendToUserCheckAll() {
+        $('div#divSelUser td.checked').html("&#10004;").attr('type', 'checked');
+    }
+    function sendToUserRemoveAll() {
+        $('div#divSelUser tr').each(function () {
+            $(this).attr('enable', 1).addClass('selUserTr').find('td.checked').html("").attr('type', 'none');
+        });
+    }
+</script>
+%{
+selUsers=controllers.FunctionController.getUsers();
+count=0;
+}%
+<div class="modal fade" id="modal-select" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" style="text-align: center">${_title}</h4>
+            </div>
+                <div class="align-center" style="padding: 0 0 8px 0">
+                    <a class="btn btn-default m-t-10" onclick="sendToUserCheckAll()"><i class="fa fa-check"></i>Бүгдийг
+                        сонгох</a>
+                    <a class="btn btn-default m-r-10 m-t-10" onclick="sendToUserRemoveAll()"><i class="fa fa-times"></i>Бүгдийг
+                        арилгах</a>
+                </div>
+                <div style="max-height: 500px;overflow-x: hidden;overflow-y:scroll;padding: 0" id="divSelUser">
+                    <table cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #ddd;
+                            width: 100%;">
+                    %{teamName="team";teamId=0;}%
+                    #{list items:selUsers,as:'us'}
+                    %{if(us.userTeam.id!=teamId){
+                        teamId=us.userTeam.id;
+                        teamName=us.userTeam.name;}%
+                        <tr class="${_showTeam?'selUserTr':''} ${count%2==0?'odd':'even'}" type="team" id="t-${teamId}"
+                            enable=1>
+                            #{if _showTeam}
+                                <td style="width: 40px;text-align: center;border-bottom: 1px solid #d3d3d3;"
+                                    class="checked"
+                                    type="nono" uid="${teamId}" name="${teamName}" selType="t" id="t-${teamId}"></td>
+                            #{/if}
+                            <td style="border-bottom: 1px solid #d3d3d3;padding: 4px" colspan="3"><b>${teamName}</b>
+                            </td>
+                        </tr>
+                    %{count++;}}%
+                        <tr class="t-${us.userTeam.id} selUserTr ${count%2==0?'odd':'even'}" type="user" enable=1>
+                            #{if _showTeam}
+                                <td style="width: 40px;border-bottom: 1px solid #d3d3d3;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                            #{/if}
+                            <td style="width: 40px;text-align: center;border-bottom: 1px solid #d3d3d3;" class="checked"
+                                type="nono" uid="${us.id}" name="${us}"
+                                selType="u" id="u-${us.id}"></td>
+                            <td style="width: 56px;border-bottom: 1px solid #d3d3d3;"><img src="${us.profilePicture}"
+                                                                                           height="64" width="64"
+                                                                                           style="float: left;"></td>
+                            <td class="info" style="border-bottom: 1px solid #d3d3d3;">
+                                <table cellspacing="0" cellpadding="0" border="0" style="width: 100%">
+                                    <tr>
+                                        <td style="font-size: 16px;padding: 6px 8px">
+                                            <b>${us.firstName}</b>&nbsp;${us.lastName}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px 8px">&{'UserPosition'}: <span
+                                                style="font-size: 16px">${us.userPosition.name}</span></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    %{count++;}%
+                    #{/list}
+                    </table>
+                </div>
+            <div class="modal-footer" style="margin-top: 0">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+                <button type="button" class="btn btn-success" onclick="sendToUserTeamFunc()">Сонгох</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="md-overlay"></div> <!-- Overlay Element. Important: place just after last modal -->
+<script type="text/javascript">
+    $('div#divSelUser tr.selUserTr').on('click', function () {
+        if ($(this).attr('enable') == 1) {
+            if ($(this).find('td.checked').attr('type') == 'checked') {
+                $(this).find('td.checked').html("").attr('type', 'none');
+                if ($(this).attr('type') == 'team') {
+                    $(this).parent().find('tr.' + $(this).attr('id')).each(function () {
+                        $(this).attr('enable', 1).addClass('selUserTr').find('td.checked').html("").attr('type', 'none');
+                    });
+                }
+            } else {
+                $(this).find('td.checked').html("&#10004;").attr('type', 'checked');
+                if ($(this).attr('type') == 'team') {
+                    $(this).parent().find('tr.' + $(this).attr('id')).each(function () {
+                        $(this).attr('enable', 0).removeClass('selUserTr').find('td.checked').html("&#10004;").attr('type', 'checked');
+                    });
+                }
+            }
+        }
+    });
+    var closeButtonClick = false;
+    function sendToUserTeamFunc() {
+        if (!closeButtonClick) {
+            $('#modal-select').modal('hide');
+            var obj = $('${_containTag}');
+            obj.html("<ul></ul>");
+            obj = obj.find("ul");
+            var objTd;
+            $('div#divSelUser tr.selUserTr').each(function () {
+                if ($(this).attr('enable') == 1) {
+                    objTd = $(this).find('td.checked');
+                    if (objTd.attr('type') == 'checked') {
+                        obj.append("<li id=" + objTd.attr('selType') + "-" + objTd.attr('uid') + " seltype=" + objTd.attr('selType') + " uid=" + objTd.attr('uid') + ">" +
+                        "<span onclick=sendToUserRemoveSelection('" +
+                        objTd.attr('selType') + "'," + objTd.attr('uid') + ")><i class='fa fa-minus-circle asterisk'></i> </span>" + objTd.attr('name') + "</li>");
+                    }
+                }
+            });
+        }
+    }
+    function sendToUserRemoveSelection(selType, id) {
+        $("${_containTag} li#" + selType + "-" + id).remove();
+    }
+    $('#selectSendUserButton').click(function () {
+        closeButtonClick = false;
+        sendToUserRemoveAll();
+        $("${_containTag} li").each(function () {
+            $('div#divSelUser td#' + $(this).attr('id')).parent().click();
+        });
+    });
+    $('#modal-select').on('hidden.bs.modal', function () {
+        closeButtonClick = true;
+    })
+</script>
+
+<style>
+    div#divSelUser tr.selUserTr:hover {
+        background-color: #eee;
+        cursor: pointer;
+    }
+
+    div#divSelUser tr.even {
+        background-color: #f9f9f9;
+    }
+    ${_containTag} li {
+                       list-style-type: none;
+                       padding: 2px 4px;
+                       border-bottom: 1px solid #d3d3d3;
+                   }
+    ${_containTag} li span {
+                       /*margin-left: 4px;*/
+                       cursor: pointer;
+                   }
+</style>

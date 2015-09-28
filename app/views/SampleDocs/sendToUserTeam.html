@@ -1,0 +1,15 @@
+#{extends 'CRUD/layout.html' /}
+#{set title: play.i18n.Messages.get('Dashboard')/}
+#{set baseClass:'modals'/}
+<div id="sendUserTag"></div>
+<button class="btn btn-effect btn-default" data-modal="modal-select" id="selectSendUserButton">Хүн нэмэх</button>
+#{selectSentUsers containTag:"div#sendUserTag", title:'Хүн сонгох',showTeam:true, effect:13 /}
+
+#{set 'moreStyles'}
+<link href="/assets/plugins/modal/css/component.css" rel="stylesheet">
+#{/set}
+#{set 'moreScripts'}
+<script src="/public/jquery-ui-1.11.2.custom/jquery-ui.min.js"></script>
+<script src="/assets/plugins/modal/js/classie.js"></script>
+<script src="/assets/plugins/modal/js/modalEffects.js"></script>
+#{/set}

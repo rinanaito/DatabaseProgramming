@@ -1,0 +1,176 @@
+#{extends 'CRUD/layout.html' /}
+#{fileupload-config /}
+#{fancybox-config /}
+<style type="text/css">
+    div#profilePicture {
+        height: 125px;
+    }
+
+    div#profilePicture span.uploadButton {
+        margin: 3px 0 0 10px;
+    }
+
+    div#profilePicture span {
+        float: left;
+        clear: both;
+    }
+
+    div#profilePicture span img {
+        float: left;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0px 0px 3px black;
+        background: gray;
+        height: 100px;
+        width: 88px;
+        margin: 3px 0 0 1px;
+        border-radius: 3px;
+    }
+
+    div#profilePicture img {
+
+    }
+
+    div#profilePicture h3 {
+        margin-left: 110px;
+    }
+
+    #password-input span {
+        display: inline-block;
+        width: 100px;
+        color: #555;
+    }
+
+</style>
+<script type="text/javascript">
+    var uploader;
+    function createUploader() {
+        uploader = new qq.FileUploader({
+
+            element: document.getElementById('file-uploader-demo2'),
+            action: '@{FileUploader.uploadFileCustom}',
+            onSubmit: function (id, fileName) {
+                uploader.setParams({uploadPath: "${controllers.Consts.uploadUserImagePath}", filename: fileName,
+                    upfilename: "uploaded", ratio: "350x400" });
+            },
+            onProgress: function (id, fileName, loaded, total) {
+                var s = $("#uploadProgress");
+                if (s.length > 0)
+                    s.text(parseInt(loaded * 100 / total) + "%");
+            },
+            onComplete: function (id, fileName, responseJSON) {
+                var profileUrl = responseJSON['filedir'] + responseJSON['filename'];
+                $("#profilePicture span img").attr('src', profileUrl);
+                $("#uploadProgress").text('');
+                $("#object_profilePicture").val(profileUrl);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        $("#showBox").fancybox();
+
+        $("#profilePicture span.uploadButton input").click(function () {
+            $(".qq-upload-button input").click();
+        });
+
+        $("#profilePicture span img").click(function () {
+            $("img#zoomedPicture").attr('src', $(this).attr('src'));
+            $("a#showBox").click();
+        });
+        createUploader();
+    });
+    function selectUserTeam() {
+        var obj = $('select#object_userTeam');
+        var id=$('select#object_company').val();
+        $.ajax({
+            type: "POST",
+            data: "id=" + id,
+            url: "/showUserTeamSelection"}).success(
+                function (data) {
+                    obj.html(data);
+                    if(obj.parent().hasClass('dhidden'))obj.parent().removeClass('dhidden');
+                });
+    }
+</script>
+<div style="display:none">
+    <div id="showPictureZoom">
+        <img id="zoomedPicture" src=""/>
+    </div>
+    <a id="showBox" href="#showPictureZoom"></a>
+</div>
+
+#{set title:messages.get('crud.blank.title', type.modelName) /}
+
+<div id="crudBlank" class="${type.name}">
+
+    <h2 id="crudBlankTitle">&{'crud.blank.title', type.modelName}</h2>
+
+    <div class="objectForm">
+    #{form action:@create(), enctype:'multipart/form-data'}
+        <div id="profilePicture" class="crudField crud_text ">
+            <span>
+                <img src="${object.profilePicture!=null?object.profilePicture:''}"></img>
+            </span>
+            <span class="uploadButton">
+            <input type="button" value="Хуулах"/>
+            </span>
+
+            <h3>Зураг</h3>
+
+            <h3 id="uploadProgress"></h3>
+
+            <div id="file-uploader-demo2" style="visibility:hidden;height:0;width:0;float:left;">
+                <noscript>
+                    <p>Please enable JavaScript to use file uploader.</p>
+                    <!-- or put a simple form for upload here -->
+                </noscript>
+            </div>
+        </div>
+        #{crud.form}
+            #{crud.custom 'username'}
+                <label for="object_username">
+                &{'username'}
+                </label>
+                <input id="object_username" class="" name="object.username" value="${object.username}" size="50"
+                       type="text"/>
+                #{if uniqueError != null}
+                    <span class="error">
+                Бүртгэлтэй байна.
+            </span>
+                #{/if}
+                <span class="crudHelp">
+                        Заавал.
+            </span>
+            #{/crud.custom}
+            #{crud.custom 'company'}
+                <label for="object_company">Компани</label>
+                <select id="object_company" name="object.company.id" onchange="selectUserTeam()">
+                    <option value="0">(Сонголтоос сонгоно уу)</option>
+                    #{list items:companies,as:'comp'}
+                        <option value="${comp.id}">${comp.name}</option>
+                    #{/list}
+                </select>
+                <span class="crudHelp">Заавал сонгох.</span>
+            #{/crud.custom}
+
+        #{/crud.form}
+        <p class="crudButtons">
+            <input type="submit" name="_save" value="&{'crud.save', type.modelName}"/>
+            <input type="submit" name="_saveAndContinue" value="&{'crud.saveAndContinue', type.modelName}"/>
+            <input type="submit" name="_saveAndAddAnother" value="&{'crud.saveAndAddAnother', type.modelName}"/>
+        </p>
+    #{/form}
+    </div>
+</div>
+<script type="text/javascript">
+    $('select#object_userTeam').parent().addClass('dhidden');
+</script>
+<style type="text/css">
+    table#addTeamControl td select {
+        width: 100%;
+        height: 150px;
+        border: 1px solid #ddd;
+        float: left;
+    }
+</style>

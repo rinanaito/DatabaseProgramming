@@ -1,0 +1,32 @@
+<script>
+    function showErrorMessage(message) {
+        jError(message, {
+            HorizontalPosition: "center",
+            VerticalPosition: "center",
+            ShowOverlay: false,
+            TimeShown: 2000,
+            OpacityOverlay: 0.5,
+            MinWidth: 250
+        });
+    }
+    function showSuccessMessage(message) {
+        jSuccess("<i class='fa fa-check' style='padding-right:6px'></i> " + message, {
+            HorizontalPosition: "center",
+            VerticalPosition: "center",
+            ShowOverlay: false,
+            TimeShown: 2000,
+            OpacityOverlay: 0.5,
+            MinWidth: 250
+        });
+    }
+    function showErrorMessageCustom(message,horizontal,vertical,time) {
+        jError(message, {
+            HorizontalPosition: horizontal,
+            VerticalPosition: vertical,
+            ShowOverlay: false,
+            TimeShown: time,
+            OpacityOverlay: 0.5,
+            MinWidth: 250
+        });
+    }
+</script>

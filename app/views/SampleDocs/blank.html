@@ -1,0 +1,44 @@
+#{extends 'CRUD/layout.html' /}
+#{fileupload-config /}
+#{ckeditor-config /}
+#{fancybox-config /}
+#{checkFileExtension /}
+
+<div id="divMain">
+
+#{form action:@create(), enctype:'multipart/form-data'}
+    <textarea name="editor1" id="editor1" rows="10" cols="80"></textarea>
+    #{include "SharedView/Attachs.html"/}
+
+    <div><input type="submit" value="Хадгалах"/></div>
+
+    <div id="attachs"></div>
+#{/form}
+</div>
+#{ImgThumbnail /}
+
+<script>
+    $(document).ready(function () {
+        CKEDITOR.replace('editor1', {
+            removePlugins: 'about,sourcearea'
+        });
+    });
+    $('div#divMain form').submit(function () {
+        var obj = $('div#attachs');
+        $("div#attachContainer ul#uploadBox img.imgIcon").each(function () {
+            obj.append("<input type=hidden name=filename value=" + $(this).attr('filename') + ">" +
+            "<input type=hidden name=filedir value=" + $(this).attr('filedir') + ">" +
+            "<input type=hidden name=extension value=" + $(this).attr('extension') + ">");
+        });
+        return true;
+    });
+</script>
+#{AttachScript uploadPath:controllers.Consts.uploadDocPath /}
+<style type="text/css">
+    div#divMain {
+        box-shadow: 0 0 3px black;
+        border-radius: 4px;
+        background-color: #ffffff;
+        min-height: 600px;
+    }
+</style>

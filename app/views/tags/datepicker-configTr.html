@@ -1,0 +1,128 @@
+<script src="/public/jquery-ui-1.11.2.custom/jquery-ui.js"></script>
+<link type="text/css" href="/public/jquery-ui-1.11.2.custom/jquery-ui.css" rel="stylesheet"/>
+
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+<script type="text/javascript">
+    var consts = {
+        inline: true,
+        numberOfMonths: 3,
+        dateFormat: "yy-mm-dd",
+        showOn: "button",
+        buttonImage: "/public/images/calendar.png",
+        firstDay: 1,
+        showWeek: true,
+        changeMonth: true,
+        changeYear: true,
+        buttonImageOnly: true,
+        weekHeader: "7x",
+        dayNames: [ "Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням" ],
+        dayNamesMin: [ "Да", "Мя", "Лх", "Пү", "Ба", "Бя", "Ня" ],
+        dayNamesShort: [ "Дав", "Мяг", "Лха", "Пүр", "Баа", "Бям", "Ням" ],
+        monthNames: ["Нэгдүгээр сар", "Хоёрдугаар cар", "Гуравдугаар сар", "Дөрөвдүгээр сар", "Тавдугаар сар", "Зургаадугаар сар", "Долоодугаар сар", "Наймдугаар сар", "Есдүгээр сар", "Аравдугаар сар", "Арваннэгдүгээр сар", "Арванхоёрдугаар сар"],
+        monthNamesShort: [ "1 сар", "2 cар", "3 сар", "4 сар", "5 сар", "6 сар", "7 сар", "8 сар", "9 сар", "10 сар", "11 сар", "12 сар" ]
+    };
+    var datetimeDivider = 24 * 60 * 60 * 1000;
+
+    var onChangeCall = "";
+
+    $('#object_startDate').datepicker(consts);
+    $('#object_finishDate').datepicker(consts);
+    $("#object_duration").forceNumericOnly(0, 365);
+    var getDate = function (dateId) {
+        if ($(dateId).is('input'))
+            return $(dateId).val().split('-');
+        return $(dateId).text().split('-');
+    };
+    var getMinDate = function () {
+        return getDate("#object_startDate");
+    };
+    var clearDate = function (date) {
+        date.setHours(5);
+        date.setMinutes(5);
+        date.setSeconds(5);
+        date.setMilliseconds(5);
+        return date;
+    };
+    var getDatetime = function (dateId) {
+        var date = getDate(dateId);
+        return clearDate(new Date(parseInt(date[0], 10), parseInt(date[1], 10) - 1, parseInt(date[2], 10)));
+    };
+    var getMinDatetime = function () {
+        return getDatetime("#object_startDate");
+    };
+    var getMaxDatetime = function () {
+        return getDatetime("#object_finishDate");
+    };
+    var setMinDate = function (startDate) {
+        $("#object_finishDate").datepicker("option", "minDate",
+                new Date(parseInt(startDate[0], 10), parseInt(startDate[1], 10) - 1,
+                        parseInt(startDate[2], 10)));
+    };
+    function setStartDate(y, m, d) {
+        $("#object_startDate").datepicker("option", "minDate", new Date(y, m - 1, d));
+    }
+    setMinDate(getMinDate());
+
+    function resolveStartDate() {
+        setMinDate(getMinDate());
+        resolveDate('startDate');
+    }
+
+    function resolveFinishDate() {
+        var time = getMaxDatetime().getTime() - getMinDatetime().getTime();
+        if (!isNaN(time)) {
+            $("#object_duration").val(time / datetimeDivider);
+            resolveDate('finishDate');
+        }
+    }
+
+    $('#object_startDate').change(function () {
+        resolveStartDate();
+        eval(onChangeCall);
+        setDateValue();
+    }).keyup(function () {
+        resolveStartDate();
+        eval(onChangeCall);
+    });
+
+    $('#object_finishDate').change(function () {
+        resolveFinishDate();
+        eval(onChangeCall);
+        setDateValue();
+    }).keyup(function () {
+        resolveFinishDate();
+        eval(onChangeCall);
+    });
+
+    $("#object_duration").keyup(function () {
+        resolveDate('duration');
+        eval(onChangeCall);
+    }).change(function () {
+        resolveDate('duration');
+        eval(onChangeCall);
+    });
+
+    var resolveDate = function (which) {
+        var time;
+        if (which == 'startDate' || which == 'finishDate') {
+            time = getMaxDatetime().getTime() + datetimeDivider - getMinDatetime().getTime();
+            if (time >= 0 && !isNaN(time))
+                $("#object_duration").val(parseInt(time / datetimeDivider));
+        } else if (which == 'duration') {
+            time = getMinDatetime().getTime() + (parseInt($("#object_duration").val()) * datetimeDivider) - datetimeDivider;
+            if (time >= 0 && !isNaN(time)) {
+                var date = new Date(time);
+                $("#object_finishDate").val(date.getFullYear() + "-" + (date.getMonth() + 1)
+                        + "-" + date.getDate());
+            }
+        }
+    };
+</script>
+<style type="text/css">
+    img.ui-datepicker-trigger {
+        display: none;
+        margin: 3px 0 0 2px;
+        cursor: pointer;
+        position: absolute;
+    }
+</style>

@@ -1,0 +1,12 @@
+<div id="SortTools"></div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("div#crudContent a").click(function (event) {
+            if (!$(this).hasClass('edd')) {
+                var sortType = $(this).attr('href') + "&id=${functionArguments}";
+                $(this).attr('href', sortType);
+                return true;
+            }
+        });
+    });
+</script>

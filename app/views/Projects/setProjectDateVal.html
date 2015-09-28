@@ -1,0 +1,35 @@
+#{if rel!=null}
+<script type="text/javascript">
+    var obj = $('table#mainScroll div#con-1 tr#p-${rel.task.taskGroup.projectObject.project.id}');
+    obj.find('td.startDate').html("${rel.task.taskGroup.projectObject.project.startDate.format('yyyy-MM-dd')}");
+    obj.find('td.finishDate').html("${rel.task.taskGroup.projectObject.project.finishDate.format('yyyy-MM-dd')}");
+    obj.find('td.duration').html("${rel.task.taskGroup.projectObject.project.duration}");
+
+    obj = $('table#mainScroll div#con-1 tr#o-${rel.task.taskGroup.projectObject.id}');
+    obj.find('td.startDate').html("${rel.task.taskGroup.projectObject.startDate.format('yyyy-MM-dd')}");
+    obj.find('td.finishDate').html("${rel.task.taskGroup.projectObject.finishDate.format('yyyy-MM-dd')}");
+    obj.find('td.duration').html("${rel.task.taskGroup.projectObject.duration}");
+
+    obj = $('table#mainScroll div#con-1 tr#g-${rel.task.taskGroup.id}');
+    obj.find('td.startDate').html("${rel.task.taskGroup.startDate.format('yyyy-MM-dd')}");
+    obj.find('td.finishDate').html("${rel.task.taskGroup.finishDate.format('yyyy-MM-dd')}");
+    obj.find('td.duration').html("${rel.task.taskGroup.duration}");
+
+    obj = $('table#mainScroll div#con-1 tr#t-${rel.task.id}');
+    obj.find('td.startDate').html("${rel.task.startDate.format('yyyy-MM-dd')}");
+    obj.find('td.finishDate').html("${rel.task.finishDate.format('yyyy-MM-dd')}");
+    obj.find('td.duration').html("${rel.task.duration}");
+    obj = $('table#mainScroll div#con-2 tr#p-${rel.task.id}');
+</script>
+#{/if}
+#{include "/Projects/ganttChart${stype}.html"/}
+<script type="text/javascript">
+    $("table#mainScroll div#con-2 tbody tr").mouseenter(function () {
+        $("table#mainScroll div#con-1 tr#" + $(this).attr('id')).addClass('mouseenter');
+        $(this).addClass('mouseenter');
+    }).mouseleave(function () {
+        $("table#mainScroll div#con-1 tr#" + $(this).attr('id')).removeClass('mouseenter');
+        $(this).removeClass('mouseenter');
+    });
+
+</script>

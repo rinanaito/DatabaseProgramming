@@ -1,0 +1,122 @@
+%{
+if(_projectAll!=null)projects=controllers.TaskUsers.getMyProjectRels();
+if(_projectAll==null || projects.size()==0){
+projectObjects=controllers.TaskUsers.getMyProjectObRels();
+if(projectObjects.size()==0){
+tasks=controllers.TaskUsers.getMyTaskRels();
+}
+}
+count=0;count2=0;count3=0;
+}%
+<div class="modal fade" id="divSelTask" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" style="text-align: center">${_title}</h4>
+            </div>
+            <ul>
+            #{if projects!=null && projects.size()>0}
+                #{list items:projects,as:'pro'}
+                %{count++;}%
+                    <li id=0-${pro.project.id} class="selTaskTr" expand="0" onclick="clickTaskLi(${pro.project.id},0)">
+                        <span class="project">${pro.project.name}&nbsp;(${pro.getCount(_uid)})</span><span
+                            class="loadget"></span>
+                    </li>
+                %{count++;}%
+                #{/list}
+            #{/if}
+            #{elseif projectObjects!=null && projectObjects.size()>0}
+                #{list items:projectObjects,as:'rel'}
+                    <li id=1-${rel.projectObject.id} class="selTaskTr" expand="0"
+                        onclick="clickTaskLi(${rel.projectObject.id},1)"
+                        style="padding-left: 25px">
+                        <span class="projectObject">${rel.projectObject.name}&nbsp;(${rel.getCount(_uid)})</span><span
+                            class="loadget"></span>
+                    </li>
+                #{/list}
+            #{/elseif}
+            #{elseif tasks!=null && tasks.size()>0}
+                #{list items:tasks,as:'rel'}
+                    <li id=2-${rel.task.id} class="selTaskTr" onclick="clickTaskLi(${rel.task.id},2)"
+                        style="padding-left: 40px">
+                        <span class="loadget"></span><span class="task" style="margin-left: 2px">${rel.task.name}</span>&nbsp;(${rel.getCount(_uid)}
+                        )
+                    </li>
+                #{/list}
+            #{/elseif}
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="md-overlay"></div> <!-- Overlay Element. Important: place just after last modal -->
+<script type="text/javascript">
+    var getMyTaskRels = #{jsAction @FunctionController.getMyTaskRels(":type",":uid",":tid") /};
+    function clickTaskLi(tid, type) {
+        var obj = $('div#divSelTask li#' + type + '-' + tid);
+        if (type != 2) {
+            if (obj.attr('expand') == 0) {
+                obj.find('span.loadget').html("<img src='/public/images/loading.gif'>");
+                $.post(getMyTaskRels({type: type, uid: ${_uid}, tid: tid}), function (data) {
+                    obj.find('span.loadget').html("");
+                    obj.after(data);
+                    obj.attr('expand', 1);
+                });
+            } else {
+                obj.attr('expand', 0);
+                obj.parent().find("div.exp" + (type + 1) + "-" + tid).each(function () {
+                    $(this).remove();
+                });
+            }
+        } else {
+            if (obj.hasClass('selected'))obj.attr("tid", tid).removeClass('selected').find('span.loadget').html("");
+            else {
+                $('div#divSelTask li.selected').each(function () {
+                    $(this).removeClass('selected').find('span.loadget').html("");
+                });
+                obj.attr("tid", tid).addClass('selected').find('span.loadget').html("&#10004;");
+                sendToTaskFunc();
+                closeModalDialog();
+            }
+        }
+    }
+    $('button#selectChooseTaskButton').click(function () {
+    });
+    function closeModalDialog() {
+        $('div#divSelTask').modal('hide');
+    }
+</script>
+
+<style>
+    div#divSelTask h3 {
+        font-size: 18px;
+    }
+
+    div#divSelTask ul {
+        padding: 0;
+        border-top: 1px solid #ddd;
+        width: 100%;
+    }
+
+    div#divSelTask li {
+        padding: 4px 8px;
+        border-bottom: 1px solid #d3d3d3;
+    }
+
+    div#divSelTask li.selTaskTr:hover {
+        background-color: #eee;
+        cursor: pointer;
+    }
+
+    div#divSelTask span.project {
+        color: #0572ff;
+    }
+
+    div#divSelTask span.projectObject {
+        color: #0000FF;
+    }
+
+    div#divSelTask li.even {
+        background-color: #f9f9f9;
+    }
+</style>

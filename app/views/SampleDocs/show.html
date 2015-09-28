@@ -1,0 +1,51 @@
+#{extends 'CRUD/layout.html' /}
+#{fileupload-config /}
+#{ckeditor-config /}
+#{fancybox-config /}
+#{checkFileExtension /}
+
+<div id="divMain">
+
+#{form action:@controllers.SampleDocs.save(sampleDoc.id), enctype:'multipart/form-data'}
+    <textarea name="editor1" id="editor1" rows="10" cols="80">${sampleDoc.documentText.raw()}</textarea>
+    #{include "SharedView/Attachs.html"/}
+    #{ImgThumbnail /}
+    <div><input type="submit" value="Хадгалах"/></div>
+    <div id="attachs"></div>
+#{/form}
+</div>
+
+<script>
+    $(document).ready(function () {
+        CKEDITOR.replace('question', {
+            removePlugins: 'about,sourcearea'
+        });
+        var obj=$("div#attachContainer ul#uploadBox li");
+
+    #{list items:sampleDoc.docAttaches, as:'attach'}
+          obj.before("<li><span>${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension).raw()}"+
+                "${controllers.Functions.handleDocumentAttachmentDel(attach.dir,attach.name,attach.extension).raw()}"+
+                "</span></li>");
+
+    #{/list}
+
+    });
+    $('div#divMain form').submit(function () {
+        var obj = $('div#attachs');
+        $("div#attachContainer ul#uploadBox img.imgIcon").each(function () {
+            obj.append("<input type=hidden name=filename value=" + $(this).attr('filename') + ">" +
+            "<input type=hidden name=filedir value=" + $(this).attr('filedir') + ">" +
+            "<input type=hidden name=extension value=" + $(this).attr('extension') + ">");
+        });
+        return true;
+    });
+</script>
+#{AttachScript uploadPath:controllers.Consts.uploadDocPath /}
+<style type="text/css">
+    div#divMain {
+        box-shadow: 0 0 3px black;
+        border-radius: 4px;
+        background-color: #ffffff;
+        min-height: 600px;
+    }
+</style>

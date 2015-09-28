@@ -1,0 +1,32 @@
+<script type="text/javascript">
+    var cc = "",calFirstDay;
+    for (var i = 1; i <= '${dom}'; i++) {
+        if (i == '${day}')calFirstDay = i;
+        cc += "<span class='calsnormal' id=day-" + i + " onclick='onCal(" + i + ")'>" + i + "</span>&nbsp;&nbsp;&nbsp;";
+    }
+    $("div#calendarTable span#calendarV").html(cc);
+    Year = "${year}";
+    Month = "${month}";
+    onCal(calFirstDay);
+    function calStepNextDay() {
+        if (oldday < '${dom}')
+            onCal(oldday + 1);
+    }
+    function calStepPrevDay() {
+        if (oldday > 1)
+            onCal(oldday - 1);
+    }
+</script>
+<div id=calendarTable>
+    <input type="button" value="Today" onclick="calSetToday()"> &nbsp;&nbsp;
+    <span class="nowCalendar">${year}</span>&nbsp;&nbsp;
+    <input type="image" src="/public/images/task/prev.png" width="18px" height="18px" align="top"
+           style="vertical-align: middle;" onclick="calStepPrevDay()">
+    <input type="button" value="${mprev}" onclick="calStepMonth(-1)"> &nbsp;&nbsp;
+<div style="border-radius: 4px 4px 4px 4px;border: 1px #808080 solid;display: inline-block;">
+<span class="nowCalendar">${mnow}</span>&nbsp;&nbsp;
+<span id=calendarV></span></div>&nbsp;&nbsp;
+    <input type="button" value="${mnext}" onclick="calStepMonth(1)">
+    <input type="image" src="/public/images/task/next.png" width="18px" height="18px" align="top"
+           style="vertical-align: middle;" onclick="calStepNextDay()">
+</div>

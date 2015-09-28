@@ -1,0 +1,34 @@
+#{extends 'CRUD/layout.html' /}
+#{set title:messages.get('crud.list.title', type.name) /}
+
+<div id="crudList" class="${type.name}">
+
+    <h2 id="crudListTitle">Төсөл сонгох</h2>
+
+    <div id="crudListTable">
+    #{crud.table fields:['name','startDate','finishDate','duration','completedPercent'],sort:[] }
+        #{crud.custom 'name'}
+            <a href="@{controllers.Projects.setDates(object.id)}" class="edd">${object.name}</a>
+        #{/crud.custom}
+
+        #{crud.custom 'startDate'}
+        ${object.startDate?.format('yyyy-MM-dd')}
+        #{/crud.custom}
+        #{crud.custom 'finishDate'}
+        ${object.finishDate?.format('yyyy-MM-dd')}
+        #{/crud.custom}
+        #{crud.custom 'duration'}
+        ${object.duration}
+        #{/crud.custom}
+        #{crud.custom 'completedPercent'}
+        ${object.completedPercent}
+        #{/crud.custom}
+
+    #{/crud.table}
+    </div>
+
+    <div id="crudListPagination">
+    #{crud.pagination /}
+    </div>
+</div>
+

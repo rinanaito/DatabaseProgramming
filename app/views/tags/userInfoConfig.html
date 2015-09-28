@@ -1,0 +1,33 @@
+<script type="text/javascript">
+    var sid =${_sid!=null?_sid:"''"};
+    $("td a.selectInfoView" + sid).bind('mouseenter',
+            function() {
+                var aPos = $(this).offset(),ctTop = 0,ctLef = 0;
+                var sui,ContainT,typeId;
+                typeId = $(this).attr('sid');
+                if (!typeId)typeId = "";
+                sui = $("div#selector-info" + typeId);
+                ctTop = (aPos.top - ctTop + 22);
+                ctLef = (aPos.left - ctLef );
+
+                sui.css('top', ctTop + "px");
+                sui.css('left', ctLef + "px");
+                sui.show();
+                if (typeId == 3) loadSelectorInfo3($(this).attr('oid'), $(this).attr('type'));
+                else if (typeId == 2) loadSelectorInfo2($(this).attr('oid'), $(this).attr('type'));
+                else   loadSelectorInfo($(this).attr('oid'), $(this).attr('type'));
+            }).bind('mouseleave', function() {
+                if ($(this).attr('sid') == 3) {
+                    $("div#selector-info3").hide();
+                    cancelSelectorInfo3();
+                } else if ($(this).attr('sid') == 2) {
+                    $("div#selector-info2").hide();
+                    cancelSelectorInfo2();
+                }
+                else {
+                    $("div#selector-info").hide();
+                    cancelSelectorInfo();
+                }
+            });
+</script>
+
