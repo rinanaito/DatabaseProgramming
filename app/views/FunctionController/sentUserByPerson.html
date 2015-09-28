@@ -1,0 +1,14 @@
+<ul>
+    #{list items:users,as:'us'}
+    <li id="p-${us.id}" type=p onclick="selectSentUserLi(${us.id},'p')">
+        <div>
+            <img src="${us.profilePicture}" height="40" width="35" style="float: left;">
+            <b>${us.username}</b>
+            <span style="float: right;${us.userPosition.name.length()>25?'font-size: 10px':''}">${us.userPosition.name}</span>
+            <br/>
+            <span>${us.firstName}</span>
+            <span>${us.lastName}</span>
+        </div>
+    </li>
+    #{/list}
+</ul>

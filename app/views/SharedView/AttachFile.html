@@ -1,0 +1,26 @@
+<div style="display:none">
+    <div id="showPictureZoom">
+        <img id="zoomedPicture" src=""/>
+    </div>
+    <a id="showPictureZoomA" href="#showPictureZoom"></a>
+</div>
+<div id="attachContainer" style="height: 25px;">
+    <div style="display: none" id="documentImageTemplate">
+        <li onclick="uploadClick(this)">
+        <span>
+          <span></span>
+        </span>
+        </li>
+    </div>
+    <div style="display: none" id="deleteImageTemplate">
+        <img height='12' class='deleteUploadedImage' width='12' src="@{'/public/images/delete-image.png'}"
+             fileDir='#fileDir' extension='#extension'/>
+    </div>
+    <ul id="uploadBox">
+        <li onclick="uploadClick(this)">
+            <span>
+            <span></span>
+            </span>
+        </li>
+    </ul>
+</div>

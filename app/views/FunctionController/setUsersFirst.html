@@ -1,0 +1,15 @@
+#{list items:objects,as:'user'}
+<li id="${user.id}">
+    <div id="${user.id}">
+
+        <img src="${user.profilePicture}" height="23" width="20">
+
+        <b>${user.username}</b>
+          <span style="float: right; padding-left: 40px">${user.userPosition.name}</span>
+        <br />
+        <span>${user.firstName}</span>
+        <span>${user.lastName}</span>
+        <input type="checkbox">
+    </div>
+</li>
+#{/list}

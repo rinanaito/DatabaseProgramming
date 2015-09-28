@@ -1,0 +1,50 @@
+<div id="selector-info3" style="display:none;width: auto;"><img src="&{'/public/images/ajax-loader-h.gif'}"
+                                                               id="loadingSelectInfoImage3"></div>
+
+<script type="text/javascript">
+    var loadingSelectInfoImage3 =
+    #{jsAction @FunctionController.getSelectorInfo(":id",":type") /}
+    var loadSelectorRequest3;
+
+    function loadSelectorInfo3(id, type) {
+        removeSelectorLoading3();
+        loadSelectorRequest3 = $.post(loadingSelectInfoImage3({id:id, type:type}), function(data) {
+            $("img#loadingSelectInfoImage3").hide();
+            $("div#selector-info3").append(data);
+        });
+    }
+    function cancelSelectorInfo3() {
+        loadSelectorRequest3.abort();
+        removeSelectorLoading3();
+    }
+    function removeSelectorLoading3() {
+        $("div#selector-info3").find("table#selector-info-table").remove();
+        $("img#loadingSelectInfoImage3").show();
+    }
+</script>
+
+<style type="text/css">
+    table td a.selectInfoView3 {
+        text-decoration: none;
+        color: #000000;
+    }
+
+    div#selector-info3 {
+        /*background: #333;*/
+        background: #ffffff;
+        box-shadow: 0 0 18px black;
+        border: 1px solid #dcdcdc;
+        border-radius: 8px;
+        position: absolute;
+        width: 240px;
+        height: auto;
+        min-height: 30px;
+        /*box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 1px 0 #727272 inset;*/
+        color: #000000;
+        /*color: #d3d3d3;*/
+    }
+    div#selector-info3 > img {
+        margin-left: 15px;
+        margin-top: 10px;
+    }
+</style>

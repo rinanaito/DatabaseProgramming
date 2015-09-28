@@ -1,0 +1,38 @@
+%{if(stype==0){ }%
+#{list items:objects,as:'us'}
+<li id="${us.id}">
+    <div id="${us.id}">
+
+        <img src="${us.profilePicture}" height="54" width="47" style="float: left;">
+
+        <b>${us.username}</b>
+        <span style="float: right; padding-left: 40px">${us.userTeam.name}</span>
+        <br/>
+        <span style="float: right; padding-left: 40px">${us.userPosition.name}</span>
+        <span>${us.firstName}</span>
+        <span>${us.lastName}</span>
+        <input type="checkbox">
+    </div>
+</li>
+#{/list}
+%{}else if(stype==1){}%
+
+#{list items:objects,as:'eqp'}
+<li id="${eqp.id}">
+    <div id="${eqp.id}">
+
+        <img src="${eqp.image}" height="54" width="81" style="float: left;">
+
+        <b>${eqp.idr}</b>
+        <br/>
+        <span style="float: right; padding-left: 40px">${eqp.status}</span>
+        <span>${eqp.userTeam.name}</span>
+         <br/>
+        <span>${eqp.description}</span>
+        <input type="checkbox">
+    </div>
+</li>
+#{/list}
+
+
+%{}}%

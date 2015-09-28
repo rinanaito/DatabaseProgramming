@@ -1,0 +1,53 @@
+%{ if(type == 'team'){ }%
+<ul>
+    #{list items:userTeams,as:'userTeam'}
+    <li id="${userTeam.id}">
+        <a type="${sid==0?'user':'equipmentGroup'}" id="${userTeam.id}">${userTeam.name}
+            (${sid==0?userTeam.users.size():userTeam.equipments.size()})</a>
+    </li>
+    #{/list}
+</ul>
+%{ }else if(type == 'user'){ }%
+<ul class="s-user">
+    #{list items:users,as:'us'}
+    <li user="user-${us.id}" id="${us.id}">
+        <div id="${us.id}" class="actionAdd">
+            <img src="${us.profilePicture}" height="54" width="47" style="float: left;">
+            <a type="Last">${us.username}</a>
+            <span style="float: right; padding-left: 40px">${us.userPosition.name}</span>
+            <br/>
+            <span>${us.firstName}</span>
+            <span>${us.lastName}</span>
+            <input type="checkbox">
+        </div>
+    </li>
+    #{/list}
+</ul>
+%{ }else if(type=="equipmentGroup"){ }%
+<ul class="s-user">
+    #{list items:equipmentGroup,as:'eqpGr'}
+    <li user="user-${eqpGr.id}" id="${eqpGr.id}">
+        <div id="${eqpGr.id}">
+            <a type="equipment" id="${eqpGr.id}" style="color: #5686a8">${eqpGr.name} (${eqpGr.equipments.size()})</a>
+            <br/>
+            <span style="float: right;font-weight: bold;">${eqpGr.typer}</span> </div>
+    </li>
+    #{/list}
+</ul>
+%{ }else if(type=="equipment"){ }%
+<ul class="task s-user">
+    #{list items:equipment,as:'eqp'}
+    <li user="user-${eqp.id}" id="${eqp.id}">
+        <div id="${eqp.id}" class="actionAdd">
+            <img src="${eqp.image}" height="54" width="81" style="float: left;">
+            <a type="Last" id="${eqp.id}" style="color: #5896c8">${eqp.idr}</a>
+
+            <span style="float: right;">${eqp.status}</span>
+             <br/>
+            <span>${eqp.description}</span>
+            <input type="checkbox"/>
+        </div>
+    </li>
+    #{/list}
+</ul>
+%{ } }%

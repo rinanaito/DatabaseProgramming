@@ -1,0 +1,81 @@
+<div id=ImgThumbnail style="position: fixed;width: 10px;height: 400px;z-index: 2000;  box-shadow: 0 0.5px 5px gray;
+        border-radius: 12px;
+  min-width: 400px;
+    background-color: #ffffff;" class="dhidden">
+</div>
+<div style="display:none">
+    <div id="showPictureZoom">
+        <img id="zoomedPicture" src=""/>
+    </div>
+    <a id="showPictureZoomA" href="#showPictureZoom"></a>
+</div>
+<script type="text/javascript">
+    var downloadAction = #{jsAction @FunctionController.downloadFile(":fileDir",":fileName",":extension") /};
+    $(document).ready(function () {
+        $("#showPictureZoomA").fancybox();
+    });
+    function settime() {
+        $("a#showPictureZoomA").click();
+        var ImgZ = $("img#zoomedPicture");
+        if (ImgZ.width() > screen.width) {
+            var ww = screen.width - 200;
+            ww *= ImgZ.height();
+            var hh = ww / ImgZ.width();
+            ImgZ.css('width', screen.width - 200);
+            ImgZ.css('height', hh);
+        }
+    }
+    function handleAttachmentClick(image) {
+        var ext = checkFileExtension(image.attr('extension'));
+        if (ext == imageFile) {
+            $('div#showPictureZoom').html("<img id='zoomedPicture' src=''/>");
+            var ImgZ = $("img#zoomedPicture");
+            ImgZ.attr('src', image.attr('fileDir') + "." + image.attr('extension'));
+            setTimeout("settime()", 300);
+        } else if (ext == pdfFile) {
+            window.open(image.attr('fileDir') + "." + image.attr('extension'));
+        } else if (ext == wordFile || ext == excelFile || ext == powerPointFile) {
+            var pathArray = location.href.split('/');
+            window.open("http://view.officeapps.live.com/op/view.aspx?src=" + pathArray[2] + image.attr('fileDir') + "." + image.attr('extension'));
+        } else {
+            $('body').append("<iframe height='0' width='0' style='display:none' src='" + downloadAction({
+                fileDir: image.attr("fileDir"),
+                fileName: image.attr("fileName"),
+                extension: image.attr("extension")
+            }) + "'/>");
+        }
+    }
+    var objTumb = $('div#ImgThumbnail');
+    $("${_div} img.imgIcon").mouseenter(
+            function () {
+                if ($(this).attr('type') == "${controllers.Consts.imageFileType}") {
+                    var loc = $(this).offset();
+                    objTumb.html("<img style='box-shadow: 0 0.5px 5px gray; border-radius: 12px'" +
+                    " src=" + $(this).attr('src') + ">");
+                    if (loc.top > 200)loc.top -= 200;
+                    if ((screen.width / 2) < loc.left)loc.left -= 420;
+                    else loc.left += 50;
+                    loc.top -= $(document).scrollTop();
+                    objTumb.css('top', loc.top + "px");
+                    objTumb.css('left', loc.left + "px");
+                    objTumb.removeClass('dhidden');
+                }
+            }).mouseleave(function () {
+                objTumb.addClass('dhidden');
+            }).on('click', function () {
+                handleAttachmentClick($(this));
+            });
+</script>
+<style>
+    div.post-images img {
+        height: 25px;
+        width: 25px;
+        cursor: pointer;
+        margin: 5px 5px 0 0;
+        box-shadow: 0 0 1px gray;
+        border: 1px solid #333;
+        border-radius: 2px;
+        background: white;
+    }
+
+</style>

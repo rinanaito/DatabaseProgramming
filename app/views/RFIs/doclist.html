@@ -1,0 +1,166 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'RFI'/}
+#{set activeMenuSub:'RFIdocs'/}
+
+<div id="main-content" style="font-weight: 500;">
+    <div class="top-page clearfix" style="margin-bottom: 0!important; padding-bottom: 5px;">
+        <div class="page-title pull-left">
+            <a href="@{RFIs.viewAll()}">
+                <h3 class="pull-left">&{'Documents'}</h3></a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12 table-responsive">
+            <table id="posts-table" class="table table-tools table-striped" style="font-size: 13px!important;  margin-top: 0!important;">
+                <thead>
+                <tr>
+                    <th id="id" class="text-center" style="width: 29px">
+                        #
+                    </th>
+                    <th width="auto">
+                    &{'Subject'}
+                    </th>
+                    <th style="width: 250px">
+                    &{'QuestionReceivedFrom'}
+                    </th>
+                    <th class="text-center" style="width: 170px">
+                    &{'CreatedDate'}
+                    </th>
+                    <th class="text-center" style="width: 200px">
+                    &{'ForwardDate'}
+                    </th>
+                    <th class="text-center" style="width: 40px;">
+
+                    </th>
+                </tr>
+                </thead>
+                <tbody style="font-weight: 500">
+                #{list items:rfi_forwards, as:'forward'}
+                <tr onclick="${'show(' + forward.id + ')'}" title="&{'ViewRFI'}">
+                    <td>${forward.rfi.id}</td>
+                    <td>${forward.rfi.subject}</td>
+                    <td>${forward.rfi.questionReceivedFrom.getLastnameFirstCharacter()}. ${forward.rfi.questionReceivedFrom.firstName}
+                        (${forward.rfi.questionReceivedFrom.userTeam.name})
+                    </td>
+                    <td class="text-center">${forward.rfi.createDate.format("yyyy-MM-dd")}</td>
+                    <td class="text-center">${forward.createDate.format("yyyy-MM-dd")}</td>
+                    <td style="width: 20px">
+                        #{if forward.rfi.rfi_attaches.size()}
+                            <div class="post-images">
+                            ${controllers.Functions.handleDocumentAttachment(forward.rfi.rfi_attaches.get(0).dir,forward.rfi.rfi_attaches.get(0).name,forward.rfi.rfi_attaches.get(0).extension).raw()}
+                            </div>
+                        #{/if}
+                    </td>
+                </tr>
+                #{/list}
+                </tbody>
+            </table>
+
+
+            <div class="page-navigation" style="width: 100%; text-align: right;">
+            %{
+                int threeDots = 0;
+                for(int i = 1; i <= MaxPageNumber; i++){
+                if( i == 1 || i == MaxPageNumber || (CurrentPageNumber < 3 && i < 5) ||
+                (CurrentPageNumber - 1 <= i && i <= CurrentPageNumber + 1) ||
+                (CurrentPageNumber > MaxPageNumber - 2 && i > MaxPageNumber - 4) ){
+                }%
+                <a #{if CurrentPageNumber != i}href="@{RFIs.doclist(i)}"#{/if}>
+                    <input class="number-button btn btn-${CurrentPageNumber == i ? 'dark':'default'}"
+                           style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;" type="button"
+                           value="${i}"/>
+                </a>
+            %{ }else{
+                if( i == 2 || i == MaxPageNumber - 1 ){
+                threeDots = 1;
+                }
+                if(threeDots == 1){
+                }%
+                <span style="font-size: x-large;"><strong>...</strong></span>
+            %{
+                threeDots = 0;
+                }
+                }
+                }
+                }%
+            </div>
+        </div>
+    </div>
+</div>
+#{ImgThumbnail div:'div.post-images'/}
+#{rfis-config /}
+<style>
+    .btn{
+        font-size: 13px!important;
+    }
+
+    table tbody tr td {
+        transition: background-color 0.3s;
+    }
+    table thead tr th{
+        font-size: 15px!important;
+        line-height: 2px!important;
+    }
+    table tbody tr td{
+        line-height: 30px!important;
+        padding-top: 2px!important;
+        padding-bottom: 2px!important;
+    }
+    table tbody tr:hover td {
+        cursor: pointer;
+        background-color: #e3e5e8 !important;
+    }
+
+    .notification {
+        z-index: 5000;
+        right: 20px;
+        bottom: 20px;
+        position: fixed;
+        width: 150px;
+        padding: 8px;
+        min-height: 100px;
+        border-radius: 3px;
+        opacity: 0;
+        transition: opacity 0.5s;
+    }
+
+    .notfOn {
+        opacity: 1;
+        transition: opacity 0.5s;
+    }
+
+</style>
+<script>
+    var idSort = 0;
+    $("th#id").click(function () {
+        if (!idSort) {
+            var wid = $("th#id").css('width');
+            $("th#id").css('width', (parseInt(wid.substr(0, wid.length - 2)) + 7) + wid.substr(wid.length - 2, 2));
+            idSort++;
+        }
+    });
+    $(document).ready(function () {
+        var opt = {};
+        // Tools: export to Excel, CSV, PDF & Print
+        opt.sDom = "",
+                opt.oLanguage = {"sSearch": "", "sZeroRecords": "Үр дүн байхгүй байна."} ,
+                opt.oTableTools = {
+                    "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": ["pdf"]
+                };
+        opt.aaSorting = [[4, 'desc']];
+        opt.aoColumnDefs = [
+            {'bSortable': false, 'aTargets': [5]}
+        ];
+
+        var oTable = $('#posts-table').dataTable(opt);
+        oTable.fnDraw();
+
+        /* Add a placeholder to search input */
+        $('.dataTables_filter input').attr("placeholder", "Search an article...");
+
+    });
+    function show(id) {
+        window.location.href = "rfiDocshow?id=" + id;
+    }
+</script>

@@ -1,0 +1,57 @@
+<script type="text/javascript">
+    var lastweek = "${maxWeek}";
+    var beforeWeek = "${thisWeek}";
+    function loadweeks(type,the_week) {
+        var wk = "",w,wc;
+        if (parseInt(lastweek) > 5) {
+            wk = "<span class='weekStyle' onclick='GotoWeek()'>Go to week  </span>";
+            wk += "<span class='weekStyle' id='weeks-1' onclick='loadweeks(1,1)'>1 </span>... ";
+        } else wk = "&nbsp;&nbsp; Week: ";
+        if (the_week <= 5 && (parseInt(lastweek) - 2) <= 5) {
+            w = 1;
+            wc = 5;
+        } else if (the_week <= (parseInt(lastweek) - 2)) {
+            if (the_week <= 5) {
+                w = 2;
+                wc = 6;
+            } else {
+                w = parseInt(the_week) - 2;
+                wc = parseInt(the_week) + 2;
+            }
+        }
+        else if (the_week <= (parseInt(lastweek) - 1)) {
+            w = parseInt(the_week) - 3;
+            wc = parseInt(the_week) + 1;
+        }
+        else {
+            w = parseInt(the_week) - 4;
+            wc = parseInt(the_week);
+        }
+        for (; w <= wc; w++) {
+            wk += "<span class='weekStyle' id='weeks-" + w + "' onclick='loadweeks(1," + w + ")'>" + w + "</span>, ";
+        }
+        if (the_week < (parseInt(lastweek) - 2))wk += " ... <span class='weekStyle' id='weeks-" + lastweek + "' onclick='loadweeks(1," + lastweek + ")'>" + lastweek + "</span>, ";
+
+        $("div#selectDate-2 span#weeks").html(wk);
+        $("div#selectDate-2 span#weeks-" + beforeWeek).removeClass('weekSelect');
+        $("div#selectDate-2 span#weeks-" + the_week).addClass('weekSelect');
+        beforeWeek = the_week;
+        if(type==1)SetDateFilterChange(the_week);
+    }
+    function GotoWeek() {
+        var the_week = window.prompt("Enter the week number you wish to go to:", beforeWeek);
+        var re = /\b\d{1,2}\b/;
+        if (re.test(the_week) && 0 != the_week && parseInt(lastweek) >= parseInt(the_week))loadweeks(1,the_week);
+    }
+    function SetDateFilterChange(the_week) {
+       loadWeekly(the_week);
+    }
+    function setWeekDateSF(ds,df){
+       $("div#selectDate-2 span#weekDateS").text(ds);
+       $("div#selectDate-2 span#weekDateF").text(df);
+    }
+    $(document).ready(function() {
+        loadweeks(0,beforeWeek);
+    });
+</script>
+<span id=weeks style="padding-left: 30px;font-size: 14px"></span><span style="padding-left: 50px" id=weekDateS></span> to <span id=weekDateF></span>

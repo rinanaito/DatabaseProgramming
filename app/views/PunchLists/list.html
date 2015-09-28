@@ -1,0 +1,386 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'PunchList'/}
+#{set activeMenuSub:'PunchListlist'/}
+<style>
+    .btn {
+        font-size: 13px !important;
+    }
+
+    table thead tr th {
+        font-size: 15px !important;
+        line-height: 2px !important;
+    }
+
+    table tbody tr td {
+        line-height: 30px !important;
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+    }
+
+    table tbody tr td {
+        transition: background-color 0.3s;
+    }
+
+    table tbody tr:hover td {
+        cursor: pointer;
+        background-color: #e3e5e8 !important;
+    }
+
+    a.btn-default:hover {
+        background-color: #2b2e33 !important;
+        color: white !important;
+    }
+
+    .notification {
+        z-index: 5000;
+        right: 20px;
+        bottom: 20px;
+        position: fixed;
+        width: 150px;
+        padding: 8px;
+        min-height: 100px;
+        border-radius: 3px;
+        opacity: 0;
+        transition: opacity 0.5s;
+    }
+
+    .notfOn {
+        opacity: 1;
+        transition: opacity 0.5s;
+    }
+
+    .kamikaze {
+        margin-bottom: 10px;
+    }
+
+</style>
+<div id="main-content" style="font-weight: 500;padding-top: 20px">
+    <div class="row tengu ${assignee == "0" && tas[0]== "0" && keyword == "" ? 'kamikaze': ''}">
+        <div class="col-md-12">
+            <div class=" ${assignee == "0" && tas[0]== "0" && keyword == "" ? '': 'dhidden'}" id="status-row">
+                <div class="col-md-2" style=" padding: 0; padding-right: 6px;">
+                    <a href="@{PunchLists.viewAll()}"
+                       class="btn btn-${status=="All" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'dark bold' : 'default'}"
+                       style="width: 100%">&{'All'}
+                        <span class="label label-${status=="All" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'primary' : 'default'} m-l-10">${all}</span></a>
+                </div>
+                <div class="col-md-2" style=" padding: 0; padding-right: 6px">
+                    <a href="@{PunchLists.list("Open","0","",1, "0")}"
+                       class="btn btn-${status=="Open" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'dark bold' : 'default'}"
+                       style="width: 100%">&{'Open'} <span
+                            class="label label-${status=="Open" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'primary' : 'default'} m-l-10">${open}</span></a>
+                </div>
+                <div class="col-md-2" style=" padding: 0; padding-right: 6px">
+                    <a href="@{PunchLists.list("Closed","0","",1, "0")}"
+                       class="btn btn-${status=="Closed" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'dark bold' : 'default'}"
+                       style="width: 100%">&{'Closed'} <span
+                            class="label label-${status=="Closed" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'primary' : 'default'} m-l-10">${close}</span></a>
+                </div>
+                <div class="col-md-2" style=" padding: 0; padding-right: 6px">
+                #{if user.getPermissionType(controllers.Consts.permissionGreatePunchList) == 3}
+                    <a href="@{PunchLists.list("Draft","0","",1, "0")}"
+                       class="btn btn-${status=="Draft" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'dark bold' : 'default'}"
+                       style="width: 100%">&{'Draft'} <span
+                            class="label label-${status=="Draft" && assignee == "0" && tas[0]== "0" && keyword == "" ? 'primary' : 'default'} m-l-10">${draft}</span></a>
+                #{/if}
+                </div>
+            #{if user.getPermissionType(controllers.Consts.permissionGreatePunchList) == 3}
+                <div class="col-mid-2" style="float: right;margin-left: 6px; padding-right: 0!important;">
+                    <a href="@{PunchLists.blank("", new Long(0),"", new Long(0))}">
+                        <button type="button" class="btn btn-success"
+                                style="float: right;width: 110px"><i class="fa fa-plus p-r-10"></i>&{'Add'}
+                        </button>
+                    </a>
+                </div>
+            #{/if}
+                <div class="col-md-2" style="float: right; padding-right: 0!important;">
+                    <button type="button" id="filter-plus" class="btn btn-effect btn-primary" data-modal="filter"
+                            style="float: right;width: 110px">
+                        <i class="fa fa-search-plus p-r-10"></i>&{'Filter'}
+                    </button>
+                </div>
+            </div>
+            <div class=" ${assignee == "0" && tas[0]== "0" && keyword == "" ? 'dhidden': ''}" id="filter-row">
+                <form id="filterForm" action="@{PunchLists.list()}" method="get">
+                    <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                        <select name="assignee" class="form-control">
+                            <option value="0">&{'ByAssignee'}</option>
+                            <option data-divider="true"></option>
+                            <option value="${user.id}" ${assignee == user.id.toString() ? 'selected' :''}>&{'Mine'}</option>
+                            <option data-divider="true"></option>
+                        #{list items:users, as:'usr'}
+                            #{if usr.id != user.id}
+                                <option style="padding-left: 35px;"
+                                        value="${usr.id}" ${assignee == usr.id.toString() ? 'selected' :''}>
+                                ${usr.getLastnameFirstCharacter()}. ${usr.firstName}
+                                </option>
+                            #{/if}
+                        #{/list}
+                        </select>
+                    </div>
+                    <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                        <select name="tasky" class="form-control">
+                            <option value="0">&{'ByTask'}</option>
+                            <option data-divider="true"></option>
+                        #{list items:projectObjects, as:'object'}
+                            #{if object.tasks.size()}
+                                <option value="o-${object.id}"
+                                        style="font-weight: bold!important;" ${tas[0] == "t" && tas[1] == object.id.toString() ? 'selected' :''}>${object.name}</option>
+                                #{list items:object.tasks, as:'task'}
+                                    <option style="padding-left: 35px;"
+                                            value="t-${task.id}" ${tas[0] == "u" && tas[1] == task.id.toString() ? 'selected' :''}>
+                                    ${task.name}
+                                    </option>
+                                #{/list}
+                                #{if object_index != projectObjects.size()}
+                                    <option data-divider="true"></option>
+                                #{/if}
+                            #{/if}
+                        #{/list}
+                        </select>
+                    </div>
+                    <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                        <select name="status" title="Choose one" class="form-control">
+                            <option value="All" ${status == "All" ? 'selected' : ''}>&{'ByStatus'}</option>
+                            <option value="Open" ${status == "Open" ? 'selected' : ''}>&{'Open'}</option>
+                            <option value="Closed" ${status == "Closed" ? 'selected' : ''}>&{'Closed'}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                        <input type="text" class="form-control" style=";"
+                               placeholder="&{'Search'}!" name="keyword" value="${keyword}"/>
+                        <input type="hidden" name="CurrentPageNumber" value="1"/>
+                    </div>
+                    <div class="col-md-2" style="padding: 0;">
+                        <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                    </div>
+                    <div class="col-md-2" style="float: right; padding-right: 0!important;">
+                        <button type="button" id="filter-minus" class="btn btn-effect btn-primary"
+                                style="float: right;">
+                            <i class="fa fa-search-minus p-r-10"></i>&{'Filter'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12 table-responsive">
+            <table id="posts-table" class="table table-tools table-striped"
+                   style="font-size: 13px!important; margin-top: 0!important;">
+                <thead>
+                <tr>
+                    <th id="id" class="text-center" style="width: 20px">
+                        #
+                    </th>
+                    <th width="auto">
+                    &{'Subject'}
+                    </th>
+                    <th style="width: 250px">
+                    &{'Assignee'}
+                    </th>
+                #{if status != "Draft" || status != "Closed"}
+                    <th class="text-center" style="width: 140px">&{'Status'}</th>
+                #{/if}
+                    <th class="text-center" style="width: 170px">
+                    &{'CreatedDate'}
+                    </th>
+                #{if status == "Closed"}
+                    <th class="text-center" style="width: 170px">&{'ClosedDate'}</th>
+                #{/if}
+                    <th class="text-center" style="width: 150px">&{'Priority'}</th>
+                #{if status == "Draft"}
+                    <th class="text-center" style="width: 40px;">
+
+                    </th>
+                #{/if}
+                #{else}
+                    <th class="text-center" style="width: 40px;">
+
+                    </th>
+                #{/else}
+                </tr>
+                </thead>
+                <tbody style="font-weight: 500">
+                #{list items:punchLists, as:'punchList'}
+                %{
+                int normal = 0; weeker = 0; overdued = 0; resolved = 0;
+                for (int i = 0; i < punchList.punchListTasks.size(); i++) {
+                if (punchList.punchListTasks.get(i).isResolve)
+                resolved++;
+                else{
+                if (now.after(punchList.punchListTasks.get(i).dueDate))
+                overdued++;
+                else {
+                if (week.after(punchList.punchListTasks.get(i).dueDate))
+                weeker++;
+                else
+                normal++;
+                }
+                }
+                }
+                }%
+                <tr onclick="${punchList.punchList_status.status == "Draft" ? 'edit(' + punchList.id + ')' : 'show(' + punchList.id + ')'}"
+                    class="${punchList.punchList_status.status == "Open" ? (overdued == 0 ? (weeker == 0 ?  (resolved == punchList.punchListTasks.size() ? "success" : "black" ) : "warning") : "danger") : "black"}"
+                    title="&{punchList.punchList_status.status == "Draft" ? 'EditPunchList' : 'ViewPunchList'}">
+                    <td class="text-center">${punchList.id}</td>
+                    <td>${punchList.name}</td>
+                    <td>${punchList.assignee.getLastnameFirstCharacter()}
+                        . ${punchList.assignee.firstName} (${punchList.assignee.userTeam.name})
+                    </td>
+                    #{if status != "Draft" || status != "Closed"}
+                        <td style="text-align: center">
+                            <span class="label label-${normal == 0 ? 'default' : 'success'}"
+                                  title="&{'normal'}">${normal}</span>
+                            <span class="label label-${weeker == 0 ? 'default' : 'warning'}"
+                                  title="&{'afterweek'}">${weeker}</span>
+                            <span class="label label-${overdued == 0 ? 'default' : 'danger'}"
+                                  title="&{'overdued'}">${overdued}</span>
+                            <span class="c-gray">|</span>
+                            <span class="label label-${resolved == 0 ? 'default' : 'primary'}"
+                                  title="&{'resolved'}">${resolved}</span>
+                        </td>
+                    #{/if}
+                    <td class="text-center">${punchList.createDate.format("yyyy-MM-dd")}</td>
+                    #{if status == "Closed"}
+                        <td class="text-center">${punchList.closedDate.format("yyyy-MM-dd")}</td>
+                    #{/if}
+                    <td class="text-center">&{punchList.punchList_priority.priority}</td>
+                    #{if status == "Draft"}
+                        <td style="text-align: center;" class="text-center mClass">
+                            #{if punchList.punchList_status.status == "Draft"}
+                                <a href="@{PunchLists.edit(punchList.id)}" data-original-title="&{'Edit'}"
+                                   data-rel="tooltip"
+                                   class="edit btn btn-sm btn-rounded btn-default">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                            #{/if}
+                        </td>
+                    #{/if}
+                    #{else}
+                    %{ resolved = resolved * 100 / punchList.punchListTasks.size();
+                        String res = String.valueOf(resolved);
+                        }%
+                        <td class="text-center"
+                            style="width: 30px; font-weight: bold; color: ${resolved < 51 ? 'red': (resolved < 81 ? 'orange' : 'green')}">
+                        ${res.substring(0,(res.length() > 4 ? 4 : res.length()))}%
+                        </td>
+                    #{/else}
+                </tr>
+                #{/list}
+                </tbody>
+            </table>
+
+            <form id="pageForm" class="dhidden" action="@{PunchLists.list()}" method="get">
+                <input type="hidden" name="assignee" value="${assignee}"/>
+                <input type="hidden" name="tasky" value="${tasky}"/>
+                <input type="hidden" name="status" value="${status}"/>
+                <input type="hidden" name="keyword" value="${keyword}"/>
+                <input type="hidden" id="PageNumber" name="CurrentPageNumber" value="${CurrentPageNumber}"/>
+            </form>
+
+            <div class="page-navigation" style="width: 100%; text-align: right;">
+            %{
+                int threeDots = 0;
+                for(int i = 1; i <= MaxPageNumber; i++){
+                if( i == 1 || i == MaxPageNumber || (CurrentPageNumber < 3 && i < 5) ||
+                (CurrentPageNumber - 1 <= i && i <= CurrentPageNumber + 1) ||
+                (CurrentPageNumber > MaxPageNumber - 2 && i > MaxPageNumber - 4) ){
+                }%
+                <input class="number-button btn btn-${CurrentPageNumber == i ? 'dark':'default'}"
+                       style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                       type="button"
+                       value="${i}"/>
+            %{ }else{
+                if( i == 2 || i == MaxPageNumber - 1 ){
+                threeDots = 1;
+                }
+                if(threeDots == 1){
+                }%
+                <span style="font-size: x-large;"><strong>...</strong></span>
+            %{
+                threeDots = 0;
+                }
+                }
+                }
+                }%
+            </div>
+        </div>
+    </div>
+</div>
+<div class="notification btn-success dhidden">
+    <h4><i class='fa fa-check-square-o' style='padding-right:6px'></i>${flash.success}</h4>
+</div>
+
+#{ImgThumbnail div:'div.post-images'/}
+#{punchList-config /}
+
+<script>
+    $(window).load(function () {
+    #{if flash.success}
+        notificationOn();
+    #{/if}
+    });
+    var idSort = 0;
+    $("th#id").click(function () {
+        if (!idSort) {
+            var wid = $("th#id").css('width');
+            $("th#id").css('width', (parseInt(wid.substr(0, wid.length - 2)) + 7) + wid.substr(wid.length - 2, 2));
+            idSort++;
+        }
+    });
+    function notificationOn() {
+        $("div.notification").removeClass("dhidden");
+        $("div.notification").addClass("notfOn");
+        setTimeout(function () {
+            $("div.notification").removeClass("notfOn");
+        }, 2000);
+        setTimeout(function () {
+            $("div.notification").addClass("dhidden");
+        }, 2500);
+    }
+    $(".page-navigation input.number-button").click(function () {
+        var obj = $(this);
+        if ($("#PageNumber").val() != obj.val()) {
+            $("#PageNumber").val(obj.val());
+            $("#pageForm").submit();
+        }
+    });
+    $(document).ready(function () {
+        var opt = {};
+        // Tools: export to Excel, CSV, PDF & Print
+        opt.sDom = "",
+                opt.oLanguage = {"sSearch": "", "sZeroRecords": "Үр дүн байхгүй байна."} ,
+                opt.oTableTools = {
+                    "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": ["pdf"]
+                };
+        opt.aaSorting = [[4, 'desc']];
+        opt.aoColumnDefs = [
+            {'bSortable': false, 'aTargets': []}
+        ];
+        var oTable = $('#posts-table').dataTable(opt);
+        oTable.fnDraw();
+
+        /* Add a placeholder to search input */
+        $('.dataTables_filter input').attr("placeholder", "Search an article...");
+
+    });
+    function show(id) {
+        window.location.href = "punchListShow?id=" + id + "&taskId=0";
+    }
+    function edit(id) {
+        window.location.href = "punchListEdit?id=" + id + "&taskId=0";
+    }
+    $("button#filter-plus").click(function () {
+        $("div#status-row").addClass("dhidden");
+        $("div#filter-row").removeClass("dhidden");
+        $("div.tengu").removeClass("kamikaze");
+    });
+    $("button#filter-minus").click(function () {
+        $("div#status-row").removeClass("dhidden");
+        $("div#filter-row").addClass("dhidden");
+        $("div.tengu").addClass("kamikaze");
+    });
+</script>

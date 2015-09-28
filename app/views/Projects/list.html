@@ -1,0 +1,37 @@
+#{extends 'CRUD/layout.html' /}
+#{set title:messages.get('crud.list.title', type.name) /}
+
+<div id="crudList" class="${type.name}">
+
+    <h2 id="crudListTitle">&{'crud.list.title', type.name}</h2>
+
+    <div id="crudListSearch">
+        <p id="crudListAdd">
+            <a href="@{blank()}" class="edd">&{'crud.add', type.modelName}</a>
+        </p>
+    #{crud.search /}
+    </div>
+
+    <div id="crudListTable">
+    #{crud.table fields:['name','ProjectObjects','startDate','finishDate','duration','completedPercent','owner'],sort:[] }
+        #{crud.custom 'name'}
+            <a href="@{show(object.id)}" class="edd" title="Засах">${object.name}</a>
+        #{/crud.custom}
+        #{crud.custom 'ProjectObjects'}
+            <a href="@{controllers.ProjectObjects.list(object.id)}">${object.projectObjects.size()}</a>
+        #{/crud.custom}
+        #{crud.custom 'startDate'}
+           ${object.startDate?.format('yyyy-MM-dd')}
+        #{/crud.custom}
+        #{crud.custom 'finishDate'}
+        ${object.finishDate?.format('yyyy-MM-dd')}
+        #{/crud.custom}
+
+    #{/crud.table}
+    </div>
+
+    <div id="crudListPagination">
+    #{crud.pagination /}
+    </div>
+</div>
+

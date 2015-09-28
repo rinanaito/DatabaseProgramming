@@ -1,0 +1,784 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'RFI'/}
+#{jqueryui-config /}
+#{fileupload-config /}
+#{ckeditor-config /}
+#{checkFileExtension /}
+<script src="/assets/plugins/currentset/d3.js" type="text/javascript"></script>
+
+<div id="main-content" style="font-weight: 500;">
+    <div class="header">
+        <div class="page-title" style="float: left;">
+            <a href="@{RFIs.viewAll()}">
+                <i class="fa fa-angle-left"></i> <span>&{'Back'}</span>
+            </a>
+        </div>
+        <div id="print" style="float: right; margin-top: 20px;">
+            <a href="rfiPrint?id=${rfi.id}">
+                <button class="btn btn-default" type="button" style="padding-left: 10px; padding-right: 10px"><i
+                        class="fa fa-print m-r-10"></i>&{'Print'}
+                </button>
+            </a>
+        #{if rfi.rfi_status.status == "Open" && rfi.questionReceivedFrom.id == user.id}
+            <a href="@{RFIs.close(rfi.id)}">
+                <button class="btn btn-default" style="padding-left: 10px; padding-right: 10px"><i
+                        class="fa fa-check-circle-o m-r-5"></i>&{'Close'}
+                </button>
+            </a>
+        #{/if}
+        #{else}
+            #{if rfi.rfi_status.status == "Closed" && rfi.questionReceivedFrom.id == user.id}
+                <a href="@{RFIs.open(rfi.id)}">
+                    <button class="btn btn-default" style="padding-left: 10px; padding-right: 10px"><i
+                            class="fa fa-check-circle-o m-r-5"></i>&{'open'}
+                    </button>
+                </a>
+            #{/if}
+        #{/else}
+        #{if rfi.questionReceivedFrom.id == user.id && rfi.rfi_status.status != "Draft"}
+            <button class="btn btn-default align-center" onclick="openForward()"
+                    style="padding-left: 10px; padding-right: 10px">&{'Forward'}
+            </button>
+        #{/if}
+        #{if rfi.rfi_status.status == "Open" && (rfi.questionReceivedFrom.id == user.id || rfi.assignee.id == user.id)}
+            <button type="button" class="btn btn-effect btn-default" data-modal="track"
+                    style="padding-left: 10px; padding-right: 10px">&{'reply'}</button>
+        #{/if}
+
+        </div>
+    </div>
+    <div class="rfi-page">
+        <div style="width: 90%; color: #000000;">
+            <table id="details-table" style="width: 100%; font-family: Arial; text-align: left;" border="0"
+                   cellpadding="0" cellspacing="0">
+                <thead>
+                <tr>
+                    <td class="td" colspan="4"
+                        style="background-color: black; color: white; height: 34px; width: 70%; border: solid black 1px">
+                    &{'RequestForInformation'}
+                    </td>
+                    <td style="width: 30%; border: solid black 1px">
+                        <span class="td" style="margin-left: 3%; margin-right: 2%;">RFI No:</span>
+                    ${rfi.id}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <span class="td">&{'AssignedTo'}:</span>
+                    ${rfi.assignee.getLastnameFirstCharacter()}. ${rfi.assignee.firstName}
+                    </td>
+                    <td class="td align-right">&{'Date'}:</td>
+                    <td style="width: 50px1шт">
+                    ${rfi.createDate.format("yy-MM-dd")}
+                    </td>
+                    <td rowspan="5" class="align-center" style="border-bottom: none!important;">
+                        <div>
+                            <img style="width: 60%;"
+                                 src="/public/images/logo/logo.png">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <span class="td">&{'Position'}:</span>
+                    ${rfi.assignee.userPosition.name}
+                    </td>
+                    <td class="td align-right" style="width: 128px">&{'ScheduleImpact'}:</td>
+                    <td style="width: 50px">&{rfi.scheduleImpact.impact}</td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <span class="td">&{'Project'}:</span>
+                    ${rfi.project.name}
+                    </td>
+                </tr>
+                #{if rfi.task != null}
+                <tr>
+                    <td colspan="4">
+                        <span class="td">&{'Task'}: </span>
+                    ${rfi.task.code} - ${rfi.task.projectObject.name}, ${rfi.task.name}
+                    </td>
+                </tr>
+                #{/if}
+                <tr style="border-bottom: none;">
+                    <td colspan="2" style="width: 360px!important;">
+                        <span class="td">&{'Location'}:</span>
+                        ${rfi.location}
+                    </td>
+                    <td class="td align-right" style="width: 128px!important;">&{'CostImpact'}:</td>
+                    <td style="width: 50px!important;">&{rfi.costImpact.impact}</td>
+                </tr>
+                </thead>
+            #{if rfi.drawing_pins != null}
+                <tbody>
+                <tr style="min-height: 60px; max-height: 130px; overflow: hidden;"
+                    valign="middle" cellpadding="0"
+                    cellspacing="0">
+                    <td colspan="5" style="padding-bottom: 8px">
+                            <span class="td" style="margin-top: 16px; height: 100%; float: left">
+                        &{'DrawingPins'}:</span>
+                        #{list items:rfi.drawing_pins, as:'dpin'}
+                            #{if dpin.drawing != null}
+                                <div class="btn btn-default drewImg" title="${dpin.drawing.name}"
+                                     onclick="editDrawing(this)"
+                                     style="vertical-align: middle; width: 100px; height: 100px; background: url('${dpin.drawing.dir + "." + dpin.drawing.extension}') no-repeat center; background-size: 100px 100px; margin-right: 5px;">
+                                    <span class="dhidden">1</span>
+                                    <input type="hidden" name="drawingType" class="drawingType"
+                                           value="drawing"/>
+                                    <input type="hidden" name="drawingPin" class="drawingPin"
+                                           value="${dpin.getJson()}"/>
+                                    <input type="hidden" name="drawingId" class="drawingId"
+                                           value="${dpin.drawing.id}"/>
+                                    <img class="dhidden"
+                                         src="${dpin.drawing.dir + "." + dpin.drawing.extension}"/>
+                                </div>
+                            #{/if}
+                            #{else}
+                                <div class="btn btn-default drewImg" title="${dpin.rfiAttachDrawing.name}"
+                                     onclick="editDrawing(this)"
+                                     style="vertical-align: middle; width: 100px; height: 100px; background: url('${dpin.rfiAttachDrawing.dir + "." + dpin.rfiAttachDrawing.extension}') no-repeat center; background-size: 100px 100px; margin-right: 5px;">
+                                    <span class="dhidden">1</span>
+                                    <input type="hidden" name="drawingType" class="drawingType"
+                                           value="attach"/>
+                                    <input type="hidden" name="drawingPin" class="drawingPin"
+                                           value="${dpin.getJson()}"/>
+                                    <input type="hidden" name="drawingId" class="drawingId"
+                                           value="${dpin.rfiAttachDrawing.id}"/>
+                                    <img class="dhidden"
+                                         src="${dpin.rfiAttachDrawing.dir + "." + dpin.rfiAttachDrawing.extension}"/>
+                                </div>
+                            #{/else}
+                        #{/list}
+                    </td>
+                </tr>
+                </tbody>
+            #{/if}
+            </table>
+            <div style="margin: 0;">
+                <table id="question-table" border="0"
+                       style="width: 100%; font-family: Arial; text-align: left;"
+                       cellpadding="0" cellspacing="0">
+                    <thead style="border: solid #000000 1px;">
+                    <tr>
+                        <td class="td" colspan="3">
+                        &{'Question'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding-left: 2%;padding-right: 2%" colspan="3">
+                        ${rfi.question.raw()}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 30%;">
+                            <span class="td">&{'DueDate'}:</span>
+                        ${rfi.dueDate.format("yy-MM-dd")}
+                        </td>
+                        <td style="width: 40%;">
+                            <span class="td">&{'IssuedBy'}:</span>
+                        ${rfi.questionReceivedFrom.getLastnameFirstCharacter()}. ${rfi.questionReceivedFrom.firstName}
+                        </td>
+                        <td style="width: 30%;">
+                            <span class="td">&{'Position'}:</span>
+                        ${rfi.questionReceivedFrom.userPosition.name}
+                        </td>
+                    </tr>
+                    </thead>
+                #{if rfi.rfi_attaches.size()}
+                    <tr style="min-height: 60px; max-height: 130px; overflow: hidden;"
+                        valign="middle" cellpadding="0"
+                        cellspacing="0">
+                        <td colspan="3" style="padding-bottom: 8px">
+                            <span class="td" style=" margin-top: 16px;height: 100%; float: left">
+                        &{'Attachments'}:</span>
+                            #{list items:rfi.rfi_attaches, as:'attach'}
+                                <div class="post-images align-center"
+                                     style="float:left;  margin-right: 10px; padding: 0;">
+                                ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension).raw()}
+                                </div>
+                            #{/list}
+                        </td>
+                    </tr>
+                #{/if}
+                #{else}
+                    <tr>
+                        <td style="padding-top: 36px;"></td>
+                    </tr>
+                #{/else}
+                #{if trackings.size()}
+                    <tr>
+                        <td colspan="3">
+                            #{list  items:trackings, as:'track' }
+                                <table id="question-table" border="0"
+                                       style="${track.author.id == rfi.assignee.id ?'margin-left: 5%; width: 95%;' : 'width: 100%;'} font-family: Arial; text-align: left;"
+                                       cellpadding="0" cellspacing="0">
+                                    <tbody style="border: solid #000000 1px;">
+                                    <tr>
+                                        <td>
+                                            <span class="td">
+                                                &{'Reply'}:
+                                            </span>
+                                        </td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding-left: 2%;padding-right: 2%" colspan="3">
+                                        ${track.note}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: ${track.author.id == rfi.assignee.id ? "25": "30"}%">
+                                            <span class="td">&{'Date'}:</span>
+                                        ${track.createDate.format("yy-MM-dd")}
+                                        </td>
+                                        <td>
+                                <span class="td" style="width: 40%">
+                                &{'RepliedBy'}:
+                                </span>
+                                        ${track.author.getLastnameFirstCharacter()}. ${track.author.firstName}
+                                        </td>
+                                        <td style="width: 30%">
+                                            <span class="td">&{'Position'}:</span>
+                                        ${track.author.userPosition.name}
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                    #{if track.tracking_attaches.size()}
+                                        <tr style="min-height: 60px; max-height: 130px; overflow: hidden;"
+                                            valign="middle" cellpadding="0"
+                                            cellspacing="0">
+                                            <td colspan="3" style="padding-bottom: 8px">
+                            <span class="td" style=" margin-top: 16px; height: 100%; float: left">
+                        &{'Attachments'}:</span>
+                                                #{list items:track.tracking_attaches, as:'attach'}
+                                                    <div class="post-images align-center"
+                                                         style="float:left;  margin-right: 10px padding: 0;">
+                                                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension).raw()}
+
+                                                    </div>
+                                                #{/list}
+                                            </td>
+                                        </tr>
+                                    #{/if}
+                                    #{else}
+                                        <tr>
+                                            <td style="padding-top: 36px;"></td>
+                                        </tr>
+                                    #{/else}
+                                </table>
+                            #{/list}
+                        </td>
+                    </tr>
+                #{/if}
+                #{if rfi.distributions.size()}
+                    <tbody style="border: solid #000000 1px;">
+                    <tr valign="middle">
+                        <td colspan="3" style="padding-top: 10px;padding-bottom: 10px">
+                            <span class="td" style="height: 100%; float: left">
+                        &{'Distribution'}:</span>
+
+                            <div style="float: left">
+                                #{list items:rfi.distributions, as:'dist'}
+                                    <span>${dist.getName()}</span>
+                                    <br>
+                                #{/list}
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                #{/if}
+                    <tr>
+                        <td style="padding-top: 36px;"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="forward" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body">
+                <form id="ford" action="@{RFIs.forward()}" method="post">
+                    <input type="hidden" name="id" value="${rfi.id}"/>
+
+                    <div class="row" style="padding-top: 1%; background-color: white">
+                        <div class="col-md-8 post-column-left">
+                            <div class="form-group row">
+                                <label><span class="td">&{'Description'}</span></label>
+                                <br>
+                                <textarea rows="4" id="text" class="form-control" name="description"></textarea>
+                                <br/>
+                                <button type="button" onclick="send()"
+                                        class="btn btn-danger btn-transparent">&{'Send'}</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="post-column-right" style="height: 175px;">
+                                <div class="form-group">
+                                    <div id="sendUserTag"></div>
+                                    <button style="width: 100%; margin-top: -2px;" type="button"
+                                            class="btn btn-effect btn-default" data-toggle="modal"
+                                            data-target="#modal-select"
+                                            id="selectSendUserButton">&{'Distribution'}</button>
+                                    <input type="hidden" name="distribution" id="distribution" value=""/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="md-modal md-effect-7" id="track">
+    <div class="md-content  md-content-white">
+        <div class="modal-header" style="padding-bottom: 15px!important;">
+            <button type="button" class="close" data-dismiss="track" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">
+            &{'writeReply'}
+            </h4>
+        </div>
+        <div class="modal-body" style="padding-bottom: 0!important;">
+            <form id="form" action="@{RFIs.track()}" method="post">
+                <input type="hidden" name="id" value="${rfi.id}"/>
+
+                <div class="form-group">
+                    <textarea class="form-control" name="note" rows="5"></textarea>
+                </div>
+                <div>
+                    <table class="table table-tools" style="font-size: 13px">
+                        <tr>
+                            <td>
+                                <div>
+                                &{'Attachments'}
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="min-height: 100px;">
+                            <td style="min-height: 100px; margin: 0; padding: 0">
+                            #{include "SharedView/Attachs.html"/}
+                                <div id="attaches"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button style="float: left;" type="submit" id="submitForm"
+                    class="btn btn-danger btn-transparent">&{'Send'}</button>
+            <button style="float: left;" type="button" class="btn btn-modal btn-default btn-transparent"
+                    data-dismiss="track">
+            &{'Close'}!
+            </button>
+        </div>
+    </div>
+</div>
+<img class="img dhidden"/>
+<div class="modal fade" id="imgView" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <svg id="svg" xmlns="http://www.w3.org/2000/svg" version="1.1"
+                         style="width: 100%; min-height: 550px; position: relative;height: 100%; cursor: move;">
+                        <foreignObject width="900" height="701" class="imgPanel" id="outer_group"
+                                       style="border: solid black 1px;stroke-width: 1.5px;"
+                                       transform="translate(90,1)scale(1)" scaler="1">
+                            <svg id="stage"></svg>
+                        </foreignObject>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="notification btn-success dhidden">
+    <h5><i class='fa fa-check-square-o' style='padding-right:6px'></i>${flash.success}</h5>
+</div>
+<script>
+    var _type = "Path";
+    var _color = "red";
+    var _opacity = 1.0;
+    var _width = 4;
+    var _text = "";
+    var _fontSize = 12;
+    var _offset = $("#outer_group").offset();
+    var newElement = null;
+    var _points = [];
+    var startPoint = [];
+    var endPoint = [];
+    var activityHistory = [];
+    var activityJson = [];
+    var svg = d3.select("#svg");
+    var svg_group = d3.select('#outer_group');
+    var group = document.getElementById('stage');
+    var zoom = d3.behavior.zoom()
+            .translate([0, 0])
+            .scale(1)
+            .scaleExtent([.5, 20])
+            .on("zoom", zoomed);
+    var no_zoom = d3.behavior.zoom();
+    function zoomed() {
+        svg_group.style("stroke-width", 1.5 / d3.event.scale + "px");
+        svg_group.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        svg_group.attr("scaler", d3.event.scale);
+    }
+    function sector(ban) {
+//        if ($(ban).attr("class") == "pinned") {
+//            alert();
+//        }
+    }
+    function readerJson(stringer) {
+        activityJson = jQuery.parseJSON(stringer);
+        var dan = svg_group.attr("scaler");
+        for (var i = 0; i < activityJson.length; i++) {
+            var json = activityJson[i];
+            newElement = null;
+            _type = json.type;
+            _color = json.color;
+            _width = json.width;
+            _fontSize = json.fontSize;
+            _text = json.text;
+            _points = [];
+            startPoint = [];
+            endPoint = [];
+            if (_type == "Path") {
+                var path = json.path;
+                var p = path.split(",");
+                path = "M" + p[0] / dan + "," + p[1] / dan;
+                _points.push([p[0], p[1]]);
+                for (var j = 2, n = p.length - 1; j < n; j += 2) {
+                    path += "L" + p[j] / dan + "," + p[j + 1] / dan;
+                    _points.push([p[j], p[j + 1]]);
+                }
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+                newElement.setAttribute("fill", "none");
+                newElement.setAttribute("d", path);
+                newElement.style.strokeLinecap = "round";
+                newElement.style.strokeLinejoin = "round";
+                newElement.style.stroke = _color;
+                newElement.style.strokeWidth = _width;
+            }
+            if (_type == "Rectangle") {
+                startPoint = json.start;
+                endPoint = json.end;
+                var a = startPoint[0] - endPoint[0], b = startPoint[1] - endPoint[1];
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+                newElement.setAttribute("fill", "none");
+                newElement.setAttribute("x", a > 0 ? endPoint[0] / dan : startPoint[0] / dan);
+                newElement.setAttribute("y", b > 0 ? endPoint[1] / dan : startPoint[1] / dan);
+                newElement.setAttribute("width", a < 0 ? -a / dan : a / dan);
+                newElement.setAttribute("height", b < 0 ? -b / dan : b / dan);
+                newElement.style.stroke = _color;
+                newElement.style.strokeWidth = _width;
+            }
+            if (_type == "Circle") {
+                startPoint = json.start;
+                endPoint = json.end;
+                var a = (startPoint[0] - endPoint[0]) / 2, b = (startPoint[1] - endPoint[1]) / 2;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'ellipse');
+                newElement.setAttribute("fill", "none");
+                newElement.setAttribute("cx", (startPoint[0] + endPoint[0]) / (2 * dan));
+                newElement.setAttribute("cy", (startPoint[1] + endPoint[1]) / (2 * dan));
+                newElement.setAttribute("rx", a < 0 ? -a / dan : a / dan);
+                newElement.setAttribute("ry", b < 0 ? -b / dan : b / dan);
+                newElement.style.strokeLinecap = "round";
+                newElement.style.strokeLinejoin = "round";
+                newElement.style.stroke = _color;
+                newElement.style.strokeWidth = _width;
+            }
+            if (_type == "Line") {
+                startPoint = json.start;
+                endPoint = json.end;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                newElement.setAttribute("fill", "none");
+                newElement.setAttribute("x1", startPoint[0] / dan);
+                newElement.setAttribute("y1", startPoint[1] / dan);
+                newElement.setAttribute("x2", endPoint[0] / dan);
+                newElement.setAttribute("y2", endPoint[1] / dan);
+                newElement.style.strokeLinecap = "round";
+                newElement.style.strokeLinejoin = "round";
+                newElement.style.stroke = _color;
+                newElement.style.strokeWidth = _width;
+            }
+            if (_type == "Arrow1") {
+                startPoint = json.start;
+                endPoint = json.end;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                line.setAttribute("x1", startPoint[0] / dan);
+                line.setAttribute("y1", startPoint[1] / dan);
+                line.setAttribute("x2", endPoint[0] / dan);
+                line.setAttribute("y2", endPoint[1] / dan);
+                line.style.stroke = _color;
+                line.style.strokeWidth = _width;
+                newElement.appendChild(line);
+                var D = Math.sqrt((endPoint[0] - startPoint[0]) * (endPoint[0] - startPoint[0]) + (endPoint[1] - startPoint[1]) * (endPoint[1] - startPoint[1]));
+                if (D > _width * 3) {
+                    var angle = 20 * Math.PI / 180;
+                    var lineangle = Math.atan2(endPoint[1] - startPoint[1], endPoint[0] - startPoint[0]);
+                    var h = Math.abs(_width * 2 / Math.cos(angle));
+                    var angle1 = lineangle + Math.PI + angle;
+                    var topx = endPoint[0] + Math.cos(angle1) * h;
+                    var topy = endPoint[1] + Math.sin(angle1) * h;
+                    var angle2 = lineangle + Math.PI - angle;
+                    var botx = endPoint[0] + Math.cos(angle2) * h;
+                    var boty = endPoint[1] + Math.sin(angle2) * h;
+                    var trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + endPoint[0] / dan + "," + endPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                }
+            }
+            if (_type == "Arrow2") {
+                startPoint = json.start;
+                endPoint = json.end;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                line.setAttribute("x1", startPoint[0] / dan);
+                line.setAttribute("y1", startPoint[1] / dan);
+                line.setAttribute("x2", endPoint[0] / dan);
+                line.setAttribute("y2", endPoint[1] / dan);
+                line.style.stroke = _color;
+                line.style.strokeWidth = _width;
+                newElement.appendChild(line);
+                var D = Math.sqrt((endPoint[0] - startPoint[0]) * (endPoint[0] - startPoint[0]) + (endPoint[1] - startPoint[1]) * (endPoint[1] - startPoint[1]));
+                if (D > _width * 5) {
+                    var angle = 20 * Math.PI / 180;
+                    var lineangle = Math.atan2(endPoint[1] - startPoint[1], endPoint[0] - startPoint[0]);
+                    var h = Math.abs(_width * 2 / Math.cos(angle));
+                    var angle1 = lineangle + Math.PI + angle;
+                    var topx = endPoint[0] + Math.cos(angle1) * h;
+                    var topy = endPoint[1] + Math.sin(angle1) * h;
+                    var angle2 = lineangle + Math.PI - angle;
+                    var botx = endPoint[0] + Math.cos(angle2) * h;
+                    var boty = endPoint[1] + Math.sin(angle2) * h;
+                    var trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + endPoint[0] / dan + "," + endPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                    lineangle = Math.atan2(startPoint[1] - endPoint[1], startPoint[0] - endPoint[0]);
+                    angle1 = lineangle + Math.PI + angle;
+                    topx = startPoint[0] + Math.cos(angle1) * h;
+                    topy = startPoint[1] + Math.sin(angle1) * h;
+                    angle2 = lineangle + Math.PI - angle;
+                    botx = startPoint[0] + Math.cos(angle2) * h;
+                    boty = startPoint[1] + Math.sin(angle2) * h;
+                    trangle = null;
+                    trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + startPoint[0] / dan + "," + startPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                }
+            }
+            if (_type == "Text") {
+                startPoint = json.start;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+                newElement.setAttributeNS(null, "fill", _color);
+                newElement.setAttributeNS(null, "x", startPoint[0] / dan);
+                newElement.setAttributeNS(null, "y", (parseFloat(startPoint[1]) + parseFloat(_fontSize)) / dan);
+                newElement.setAttributeNS(null, "font-size", _fontSize);
+                var textNode = document.createTextNode(_text);
+                newElement.appendChild(textNode);
+            }
+            if (_type == "Pin") {
+                startPoint = json.start;
+                endPoint = json.end;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'image');
+                newElement.setAttributeNS(null, 'height', 50);
+                newElement.setAttributeNS(null, 'width', 50);
+                newElement.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '/public/images/drawing/redPin.png');
+                newElement.setAttributeNS(null, 'x', (startPoint[0] - 30) / dan);
+                newElement.setAttributeNS(null, 'y', (startPoint[1] - 25) / dan);
+                newElement.setAttributeNS(null, 'class', 'pinned');
+            }
+            group.appendChild(newElement);
+        }
+    }
+</script>
+<script type="text/javascript">
+    function editDrawing(ban) {
+        $("img.img").attr("src", $(ban).find("img").attr("src"));
+        var wid = $("img.img").css("width");
+        var hei = $("img.img").css("height");
+        var foreign = document.getElementById('outer_group');
+        foreign.setAttribute('width', wid.substr(0, wid.length - 2));
+        foreign.setAttribute('height', hei.substr(0, hei.length - 2));
+        foreign.setAttribute('scaler', "1");
+        var svging = document.getElementById('stage');
+        svging.setAttribute('style', "background: url('" + $("img.img").attr("src") + "') no-repeat center; width:" + wid + "; height:" + hei + ";");
+        svg.call(zoom);
+        readerJson($(ban).find("input.drawingPin").val());
+        $("#imgView").modal('show');
+    }
+    $("#imgView").on('hide.bs.modal', function (e) {
+
+        $("svg#stage").empty();
+    });
+</script>
+<script>
+    $(document).ready(function () {
+
+        var selected = ${rfi.assignee.id};
+        $("#modal-select").find("tr td:nth-child(2)").each(function () {
+            var obj = $(this);
+            if (obj.attr('seltype') == 'u' && obj.attr('uid') == selected) {
+                obj.parent().addClass('dhidden');
+            }
+        });
+    });
+    $(window).load(function () {
+    #{if flash.success}
+        notificationOn();
+    #{/if}
+    });
+
+    function notificationOn() {
+        $("div.notification").removeClass("dhidden");
+        $("div.notification").addClass("notfOn");
+        setTimeout(function () {
+            $("div.notification").removeClass("notfOn");
+        }, 2000);
+        setTimeout(function () {
+            $("div.notification").addClass("dhidden");
+        }, 2500);
+    }
+    $("button#submitForm").click(function () {
+        var obj = $('div#attaches');
+        $("div#attachContainer ul#uploadBox img.imgIcon").each(function () {
+            obj.append("<input type='hidden' name='filename' value=" + $(this).attr('filename') + ">" +
+            "<input type='hidden' name='filedir' value=" + $(this).attr('filedir') + ">" +
+            "<input type='hidden' name='extension' value=" + $(this).attr('extension') + ">");
+        });
+        $('form#form').submit();
+    });
+    function send() {
+        var sentDist = "";
+        var addItem = "";
+        $('div#sendUserTag ul li').each(function () {
+            addItem = $(this).attr('id');
+            sentDist += addItem + ",";
+        });
+        $("input#distribution").val(sentDist);
+        $("#ford").submit();
+    }
+    function openForward() {
+        $('#forward').modal('show');
+    }
+    $('#track').on('hide.bs.modal', function (e) {
+        $("form#form div select").selectpicker('val', '');
+    });
+    $('#forward').on('hide.bs.modal', function (e) {
+    });
+</script>
+<style id="stylist">
+    .header {
+        top: 0;
+        width: 8.27in;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .btn {
+        font-size: 13px;
+    }
+
+    .rfi-page {
+        width: 8.27in;
+        margin-top: 80px;
+        margin-bottom: 30px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-top: 30px;
+        padding-bottom: 30px;
+        min-height: 800px;
+        font-size: 14px;
+        background-color: white;
+    }
+
+    .rfi-page div:first-child {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    table#details-table thead tr:first-child td {
+        font-size: 14px;
+    }
+
+    table#details-table thead tr td {
+        font-size: 12px;
+        height: 32px;
+        width: auto;
+    }
+
+    table#details-table thead tr td {
+        border-bottom: solid black 1px;
+        height: 32px;
+    }
+
+    table#details-table thead tr:last-child td {
+        border-bottom: none !important;
+    }
+
+    table#details-table thead tr td {
+    }
+
+    table#question-table tr {
+        height: 32px;
+        font-size: 12px;
+    }
+
+    .td {
+        padding-left: 10px;
+        padding-right: 10px;
+        font-weight: bold;
+    }
+
+    .align-right {
+        text-align: right;
+        padding-right: 2%;
+    }
+
+    .align-center {
+        text-align: center;
+    }
+
+    .notification {
+        z-index: 5000;
+        right: 20px;
+        bottom: 20px;
+        position: fixed;
+        width: 200px;
+        padding: 8px;
+        min-height: 100px;
+        border-radius: 3px;
+        opacity: 0;
+        transition: opacity 0.5s;
+    }
+
+    .notfOn {
+        opacity: 1;
+        transition: opacity 0.5s;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    div.post-images img {
+        border-radius: 10px;
+        width: 40px !important;
+        height: 40px !important;
+    }
+</style>
+#{ImgThumbnail div:'div.post-images'/}
+#{AttachScript uploadPath:controllers.Consts.uploadRFIAttachPath /}
+#{selectSentUsers containTag:"div#sendUserTag", title:'Хүн сонгох',showTeam:true, effect:13 /}
+#{rfis-edit-config /}

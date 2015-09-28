@@ -1,0 +1,36 @@
+<script src="/public/jquery-ui-1.11.2.custom/jquery-ui.js"></script>
+<link type="text/css" href="/public/jquery-ui-1.11.2.custom/jquery-ui.css" rel="stylesheet"/>
+
+<script type="text/javascript">
+    var consts = {
+        inline: true,
+        numberOfMonths: 1,
+        dateFormat: "yy-mm-dd",
+        showOn: "button",
+        buttonImage: "/public/images/calendar.png",
+        firstDay: 1,
+        showWeek: true,
+        changeMonth: true,
+        changeYear: true,
+        buttonImageOnly: true,
+        weekHeader: "7x",
+        dayNames: ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням"],
+        dayNamesMin: ["Да", "Мя", "Лх", "Пү", "Ба", "Бя", "Ня"],
+        dayNamesShort: ["Дав", "Мяг", "Лха", "Пүр", "Баа", "Бям", "Ням"],
+        monthNames: ["Нэгдүгээр сар", "Хоёрдугаар cар", "Гуравдугаар сар", "Дөрөвдүгээр сар", "Тавдугаар сар", "Зургаадугаар сар", "Долоодугаар сар", "Наймдугаар сар", "Есдүгээр сар", "Аравдугаар сар", "Арваннэгдүгээр сар", "Арванхоёрдугаар сар"],
+        monthNamesShort: ["1 сар", "2 cар", "3 сар", "4 сар", "5 сар", "6 сар", "7 сар", "8 сар", "9 сар", "10 сар", "11 сар", "12 сар"]
+    };
+    var datetimeDivider = 24 * 60 * 60 * 1000;
+
+    var onChangeCall = "";
+
+    $('${_divName}').datepicker(consts);
+</script>
+<style type="text/css">
+    img.ui-datepicker-trigger {
+        margin: 3px 0 0 2px;
+        cursor: pointer;
+        display: inline;
+        position: absolute;
+    }
+</style>

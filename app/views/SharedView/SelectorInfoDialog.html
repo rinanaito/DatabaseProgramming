@@ -1,0 +1,71 @@
+<div id="selector-info" style="display:none;width: auto;"><img src="&{'/public/images/ajax-loader-h.gif'}"
+                                                               id="loadingSelectInfoImage"></div>
+<script type="text/javascript">
+    var loadingSelectInfoImage =
+    #{jsAction @FunctionController.getSelectorInfo(":id",":type") /}
+    var loadSelectorRequest;
+
+    function loadSelectorInfo(id, type) {
+        removeSelectorLoading();
+        loadSelectorRequest = $.post(loadingSelectInfoImage({id:id, type:type}), function(data) {
+             $("img#loadingSelectInfoImage").hide();
+            $("div#selector-info").append(data);
+        });
+    }
+    function cancelSelectorInfo() {
+        loadSelectorRequest.abort();
+        removeSelectorLoading();
+    }
+    function removeSelectorLoading() {
+        $("div#selector-info").find("table#selector-info-table").remove();
+        $("img#loadingSelectInfoImage").show();
+    }
+</script>
+
+<style type="text/css">
+    table td a.selectInfoView {
+        text-decoration: none;
+        color: #000000;
+        cursor: pointer;
+    }
+
+    div#selector-info {
+        /*background: #333;*/
+        background: #ffffff;
+        box-shadow: 0 0 18px black;
+        border: 1px solid #dcdcdc;
+        border-radius: 8px;
+        position: absolute;
+        width: 240px;
+        height: auto;
+        min-height: 30px;
+        /*box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 1px 0 #727272 inset;*/
+        color: #000000;
+        /*color: #d3d3d3;*/
+        z-index: 1250
+    }
+
+    div#selector-info > img {
+        margin-left: 15px;
+        margin-top: 10px;
+    }
+
+    table#selector-info-table {
+        border-style: none !important;
+    }
+
+    table#selector-info-table tr {
+        line-height: 10px !important;
+    }
+
+    table#selector-info-table td {
+        border-bottom: none !important;
+        font-size: 12px;
+        color: #808080;
+    }
+
+    table#selector-info-table td#header span#name {
+        font-weight: bold;
+        color: #000000;
+    }
+</style>

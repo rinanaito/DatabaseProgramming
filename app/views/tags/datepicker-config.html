@@ -1,0 +1,76 @@
+<script type="text/javascript">
+    var consts = {
+        inline: true,
+        numberOfMonths :3,
+        dateFormat: "yy-mm-dd",
+        showOn: "button",
+        buttonImage: "/public/images/calendar.png",
+        firstDay: 1,
+        showWeek: true,
+        changeMonth: true,
+		changeYear: true,
+        buttonImageOnly: true,
+        weekHeader: "7x",
+        dayNames: ["Ням", "Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба"],
+        dayNamesMin: ["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"],
+        dayNamesShort: ["Ням", "Дав", "Мяг", "Лха", "Пүр", "Баа", "Бям"],
+        monthNames: ["Нэгдүгээр сар", "Хоёрдугаар cар", "Гуравдугаар сар", "Дөрөвдүгээр сар", "Тавдугаар сар", "Зургаадугаар сар", "Долоодугаар сар", "Наймдугаар сар", "Есдүгээр сар", "Аравдугаар сар", "Арваннэгдүгээр сар", "Арванхоёрдугаар сар"],
+        monthNamesShort: ["1 сар", "2 cар", "3 сар", "4 сар", "5 сар", "6 сар", "7 сар", "8 сар", "9 сар", "10 сар", "11 сар", "12 сар"]
+    };
+    var datetimeDivider = 24 * 60 * 60 * 1000;
+
+    var onChangeCall = "";
+
+    $('#object_startDate').datepicker(consts).attr('readonly', 'readonly');
+    $('#object_finishDate').datepicker(consts).attr('readonly', 'readonly');
+    var getDate = function(dateId) {
+        if($(dateId).is('input'))
+            return $(dateId).val().split('-');
+        return $(dateId).text().split('-');
+    };
+    var getMinDate = function(){
+        return getDate("#object_startDate");
+    };
+    var clearDate = function(date){
+        date.setHours(5); date.setMinutes(5); date.setSeconds(5); date.setMilliseconds(5);
+        return date;
+    };
+    var getDatetime = function(dateId){
+        var date = getDate(dateId);
+        return clearDate(new Date(parseInt(date[0],10), parseInt(date[1],10) - 1, parseInt(date[2],10)));
+    };
+    var getMinDatetime = function() {
+        return getDatetime("#object_startDate");
+    };
+    var getMaxDatetime = function() {
+        return getDatetime("#object_finishDate");
+    };
+    var setMinDate = function(startDate) {
+        $("#object_finishDate").datepicker("option", "minDate",
+                new Date(parseInt(startDate[0],10), parseInt(startDate[1],10) - 1,
+                        parseInt(startDate[2],10)));
+    };
+    function setStartDate(y,m,d){
+         $("#object_startDate").datepicker("option", "minDate",  new Date(y, m-1,d));
+    }
+    setMinDate(getMinDate());
+
+    function resolveStartDate(){
+        setMinDate(getMinDate());
+    }
+
+    $('#object_startDate').change(function() {
+        resolveStartDate();
+        eval(onChangeCall);
+    }).keyup(function(){
+        resolveStartDate();
+        eval(onChangeCall);
+    });
+
+</script>
+<style type="text/css">
+    img.ui-datepicker-trigger {
+        margin: 3px 0 3px 3px;
+        cursor: pointer;
+    }
+</style>

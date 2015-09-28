@@ -1,0 +1,21 @@
+<div id="search-toolbar">
+    <input type="text" size="48" id="search-pattern">
+    <button onclick="userSelectionBySearch()">&{'search'}</button>
+</div>
+<div id="search-result">
+    <ul>
+    </ul>
+</div>
+<script type="text/javascript">
+
+    var bySearchPattern = #{jsAction @FunctionController.showUserSelectionBySearchPattern(":page",":stype",":search") /};
+
+    function userSelectionBySearch(){
+        $("#search-toolbar").append($("#loading-image").html());
+        $.post(bySearchPattern({page:1,stype:"${stype}",search:$("#search-pattern").val()}),function(data){
+            $("#search-result ul").html(data);
+            $("#search-toolbar").find(".loading").remove();
+        });
+    }
+</script>
+

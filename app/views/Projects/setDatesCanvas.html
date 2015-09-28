@@ -1,0 +1,75 @@
+#{extends 'CRUD/layout.html' /}
+<div id="divMain">
+    <canvas id="myCanvas" width="420px" height="420px"
+            style="border:1px solid #c3c3c3;background: #fff;">
+    </canvas>
+</div>
+<script type="text/javascript">
+    var canvas = document.getElementById("myCanvas");
+    var context = canvas.getContext("2d");
+    var step, columns = 40, rows = 40;
+    //    ctx.fillStyle = "#FF0000";
+    //    ctx.fillRect(0, 0, 150, 75);
+
+    //    ctx.moveTo(10, 0);
+    //    ctx.lineTo(10, 100);
+    //    ctx.stroke();
+
+    //ctx.font = "30px Arial";
+    //ctx.fillText("Hello World",10,50);
+
+    //ctx.font = "30px Arial";
+    //ctx.strokeText("Hello World",10,50);
+
+    var bw = 400;
+    var bh = 400;
+    var p = 10, step = 20;
+    var lineWidth = 0.2;
+    var cw = bw + (p * 2) + 1;
+    var ch = bh + (p * 2) + 1;
+    function drawClear() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.beginPath();
+    }
+    function drawBoard() {
+        for (var x = 0; x <= bw; x += step) {
+            context.moveTo(0.5 + x + p, p);
+            context.lineTo(0.5 + x + p, bh + p);
+            context.lineWidth = lineWidth;
+        }
+
+        for (var x = 0; x <= bh; x += step) {
+            context.moveTo(p, 0.5 + x + p);
+            context.lineTo(bw + p, 0.5 + x + p);
+            context.lineWidth = lineWidth;
+        }
+        context.strokeStyle = "black";
+        context.stroke();
+        var count = 1;
+        context.fillStyle = "black";
+    #{list items:projects,as:'project'}
+        context.font = "18px Arial";
+        context.fillText('+ ${project.name}', p + 2, (step * count) + p-4);
+        count++;
+    #{/list}
+    }
+    canvas.addEventListener('click', function (e) {
+        drawClear();
+        context.fillStyle = "#FFFF99";
+        context.fillRect(0 + p, parseInt((e.offsetY + p) / 20) * 20 + 0.5 + p - 20, bw, 20);
+        drawBoard();
+    });
+
+    drawBoard();
+</script>
+<style type="text/css">
+    div#divMain {
+        box-shadow: 0 0 3px black;
+        border-radius: 4px;
+        background-color: #ffffff;
+        min-height: 600px;
+    }
+    div#divMain canvas{
+        /*cursor: pointer;*/
+    }
+</style>

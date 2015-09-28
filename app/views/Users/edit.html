@@ -1,0 +1,162 @@
+#{extends 'CRUD/layout.html' /}
+
+<table border="0" cellpadding="0" cellspacing="0" style="width: 100%">
+    <tr>
+        <td style="width: 80%;">
+
+            <form action="@{RFIs.save(rfi.id)}" method="GET" style=" padding-left: 2%; width: 96%;">
+                <div>
+                    <div>
+                    &{'CreateRFI'}
+                    </div>
+                    <table id="mainTable" border="0" cellpadding="0" cellspacing="0" style="width: 96%; margin: 2%;">
+                        <tr>
+                            <td>&{'Subject'}</td>
+                            <td colspan="3">
+                                <input type="text" name="subject" style="width: 100%"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&{'AssignedTo'}</td>
+                            <td>
+                                <select name="assignedTo">
+                                    <option>&{'SelectAPerson'}</option>
+                                #{list items:users, as:'usr'}
+                                    <option value="${usr.id}">
+                                    ${usr.getLastnameFirstCharacter()}. ${usr.firstName}
+                                    </option>
+                                #{/list}
+                                </select>
+                            </td>
+                            <td>&{'Draft'}</td>
+                            <td><input type="checkbox" name="draft" id="draft"/></td>
+                        </tr>
+                        <tr>
+                            <td>&{'QuestionReceivedFrom'}</td>
+                            <td>${user.getLastnameFirstCharacter()}. ${user.firstName}</td>
+
+                            </td>
+                            <td>&{'CostCode'}</td>
+                            <td><input type="text" name="costCode"/></td>
+                        </tr>
+                        <tr>
+                            <td>&{'Distribution'}</td>
+                            <td><select name="distribution"></select></td>
+                            <td>&{'DrawingNumber'}</td>
+                            <td><input type="text" name="drawingNumber"/></td>
+                        </tr>
+                        <tr>
+                            <td>&{'DueDate'}</td>
+                            <td><input type="text" name="dueDate" style="width: 30%" id="dueDate"/></td>
+                            <td>&{'Location'}</td>
+                            <td><input type="text" name="location"/></td>
+                        </tr>
+                        <tr>
+                            <td>&{'ScheduleImpact'}</td>
+                            <td>
+                                <select class="impact" name="scheduleImpact">
+                                    <option value="Unknown">&{'Unknown'}</option>
+                                    <option value="Yes">&{'Yes'}</option>
+                                    <option value="No">&{'No'}</option>
+                                </select>
+                            </td>
+                            <td>&{'Private'}</td>
+                            <td><input type="checkbox" name="private_"/></td>
+                        </tr>
+                        <tr>
+                            <td>&{'CostImpact'}</td>
+                            <td>
+                                <select class="impact" name="costImpact">
+                                    <option value="Unknown">&{'Unknown'}</option>
+                                    <option value="Yes">&{'Yes'}</option>
+                                    <option value="No">&{'No'}</option>
+                                </select>
+                            </td>
+                            <td>&{'OverdueNotification'}</td>
+                            <td><input type="checkbox" name="overdueNotification"/></td>
+                        </tr>
+                    </table>
+                </div>
+                <div>
+                    <div>
+                    &{'Attachments'}
+                    </div>
+                    <div>
+
+                    </div>
+                </div>
+                <div>
+                    <div>
+                    &{'Question'}
+                    </div>
+                    <div style="width: 100%">
+                        <textarea style="width: 94%; margin: 3%;" rows="6" name="question"></textarea>
+                    </div>
+                </div>
+                <div style="text-align: right; box-shadow: none; border: none; margin-top: 3%; margin-bottom: 5%;">
+                    <a href="@{RFIs.list()}">&{'Cancel'}</a>
+                    <button style="width: 8%;" type="submit" id="accept">&{'Send'}</button>
+                </div>
+            </form>
+        </td>
+        <td style="width: 20%;">
+            <div>
+                <a href="@{RFIs.list()}">
+                    <button id="button">&{'Back'}</button>
+                </a>
+
+            </div>
+        </td>
+    </tr>
+</table>
+#{datepicker-configDay divName:'input#dueDate' /}
+<style>
+    #mainTable input {
+        width: 100%;
+    }
+
+    #mainTable tr td:first-child, #mainTable tr td:nth-child(3) {
+        width: 20%;
+    }
+
+    #mainTable tr td:nth-child(2), #mainTable tr td:last-child {
+        width: auto;
+    }
+
+    form > div {
+        border: 1px solid black;
+        box-shadow: 5px 5px 5px #888888;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+
+    form > div > div:first-child {
+        width: auto;
+        height: 30px;
+        background-color: #0E3460;
+        color: #ffffff;
+        padding-left: 20px;
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+    }
+
+    #button {
+        background-color: orange;
+        border-color: orange;
+        border-radius: 5px;
+    }
+    .impact{
+        text-align: center;
+    }
+
+</style>
+<script>
+    $('input#draft').change(function () {
+        if ($(this).prop('checked')) {
+            $('button#accept').html("&{'Save'}");
+        } else {
+            $('button#accept').html("&{'Send'}");
+        }
+    });
+</script>

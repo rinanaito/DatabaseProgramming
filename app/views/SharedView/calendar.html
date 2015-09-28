@@ -1,0 +1,62 @@
+<script type="text/javascript">
+    var Year, Month, oldday = 0;
+    SetCalendar("${year}-${month}-${day}", 0);
+    function SetCalendar(dateVal, action) {
+        $.ajax({
+                    type: "POST",
+                    data: "dateVal=" + dateVal + "&action=" + action,
+                    url: "/functionController/calendarList"})
+                .success(
+                function(data) {
+                    $("div#" + calendarDiv).html(data);
+                });
+    }
+    function onCal(d) {
+        $("div#" + calendarDiv + " span#day-" + d).addClass("calselect");
+        if (d != oldday) {
+            $("div#" + calendarDiv + " span#day-" + oldday).removeClass("calselect");
+            oldday = d;
+            setCalChanged(Year + "-" + Month + "-" + oldday);
+        }
+    }
+    function calStepMonth(action) {
+        oldday = 0;
+        SetCalendar(Year + "-" + Month + "-1", action);
+    }
+    function calSetToday() {
+        oldday = 0;
+        SetCalendar($('input#dateToday').val(), 0);
+    }
+</script>
+<input type="hidden" id=dateToday value="${year}-${month}-${day}">
+<style type="text/css">
+    div#calendarTable {
+        box-shadow: 0 0 3px black;
+        border-radius: 4px;
+        width: 100%;
+        -moz-user-select: none;
+    }
+
+    div#calendarTable span.nowCalendar {
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    div#calendarTable span {
+        vertical-align: middle;
+    }
+
+    div#calendarTable span .calsnormal {
+        cursor: pointer;
+        font-size: 15px;
+    }
+
+    div#calendarTable span .calselect {
+        cursor: pointer;
+        font-size: 16px;
+        box-shadow: 0px 0px 3px 3px #7cfc00;
+        /*box-shadow: 0px 0px 3px 3px #f76262;*/
+        /*background-color: #f76262;*/
+        background-color: #7cfc00;
+    }
+</style>

@@ -1,0 +1,97 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                                        Dashboard.index
+
+GET     /rfi                                   RFIs.viewAll
+GET     /rfiView                               RFIs.list
+GET     /rfiEdit                               RFIs.edit
+GET     /rfiShow                               RFIs.show
+GET     /rfiBlank                              RFIs.blank
+POST    /rfiBlankDrawing                       RFIs.blankDrawing
+GET     /rfiBack                               RFIs.back
+POST    /rfiattachajax                         RFIs.attachAjax
+GET     /rfiClose                              RFIs.close
+GET     /rfiOpen                               RFIs.open
+POST    /rfiCreate                             RFIs.create
+POST    /rfiSave                               RFIs.save
+POST    /rfiTrack                              RFIs.track
+GET     /rfiPrint                              RFIs.print
+POST    /rfiForward                            RFIs.forward
+GET     /rfiDocuments                          RFIs.viewDocList
+GET     /rfiDocs                               RFIs.doclist
+GET     /rfiDocshow                            RFIs.docshow
+
+GET     /punchList                             PunchLists.viewAll
+GET     /punchListView                         PunchLists.list
+GET     /punchListEdit                         PunchLists.edit
+GET     /punchListShow                         PunchLists.show
+POST    /punchListReply                        PunchLists.reply
+GET     /punchListBlank                        PunchLists.blank
+POST    /punchListBlankDrawing                 PunchLists.blankDrawing
+POST    /punchListattachajax                   PunchLists.attachAjax
+GET     /punchListBack                         PunchLists.back
+GET     /punchListClose                        PunchLists.close
+POST    /punchListCreate                       PunchLists.create
+POST    /punchListSave                         PunchLists.save
+GET     /punchListPrint                        PunchLists.print
+POST    /punchListForward                      PunchLists.forward
+GET     /punchListDocuments                    PunchLists.viewDocList
+GET     /punchListDocs                         PunchLists.doclist
+GET     /punchListDocshow                      PunchLists.docshow
+
+GET     /drawing                                Drawings.home
+GET     /drawing/folder                         Drawings.folder
+POST    /drawing/createFolder                   Drawings.createFolder
+POST    /drawing/editFolder                     Drawings.editFolder
+POST    /drawing/deleteFolder                   Drawings.deleteFolder
+POST    /uploadDrawing                          Drawings.uploadDrawing
+POST    /uploading                              Drawings.handleDocumentAttachment
+POST    /drawing/editDesc                       Drawings.editDesc
+
+POST    /getItem                               PunchLists.getItem
+POST    /handleDocumentAttachment              PunchLists.handleDocumentAttachment
+
+GET     /sendToUserTeam                        SampleDocs.sendToUserTeam
+
+# Phone
+POST     /appDelegateLogin                                    AppDelegate.login
+POST     /appDelegatePortfolios                               AppDelegate.portfolios
+POST     /appDelegatePortfolioUsers                           AppDelegate.portfolioUsers
+POST     /appDelegateRFIList                                  AppDelegate.RFIList
+POST     /appDelegateRFINew                                   AppDelegate.RFINew
+POST     /appDelegateRFIReplyList                             AppDelegate.RFIReplyList
+POST     /appDelegateRFIReplyNew                              AppDelegate.RFIReplyNew
+GET      /appDelegateMobileFiles/{body}                       AppDelegate.RFIAttachRedirect
+POST     /appDelegateRFIUploadAttach                          AppDelegate.RFIUploadAttach
+GET      /android                                             AppDelegate.Android
+
+# For secure module
+*       /                                       module:secure
+
+# Crud module routing
+*      /  					module:crud
+
+# For file upload
+POST /upload                                            FileUploader.uploadFile
+POST /deleteFile/${qqFile}                              FileUploader.deleteUploadedFile
+POST /deleteUploadFile/${qqFile}                        FileUploader.deleteUploadFile
+
+# For users' control
+POST  /users/resetpassword/{id}                              Users.resetPassword
+GET   /projectsSetDates                                      Projects.setDates
+POST  /setProjectDateVal                                     Projects.setProjectDateVal
+
+
+# Ignore favicon requests
+GET     /favicon.ico                            404
+
+# Map static resources from the /app/public folder to the /public path
+GET     /public/                                    staticDir:public
+GET     /assets/                                    staticDir:assets
+GET     /FileCenter/                                staticDir:FileCenter
+
+# Catch all
+*       /{controller}/{action}                  {controller}.{action}

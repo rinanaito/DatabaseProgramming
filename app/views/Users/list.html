@@ -1,0 +1,77 @@
+#{extends 'CRUD/layout.html' /}
+<div id="crudList" class="${type.name}">
+
+    <div id="crudListContainer">
+        <div id="crudListSearch">
+            <p id="crudListAdd">
+                <a href="@{blank()}">&{'crud.add', type.modelName}</a>
+            </p>
+        #{crud.search /}
+        </div>
+
+        <div id="crudListTable">
+        #{crud.table functionName:_functionName,fields:['lastName','firstName','userPosition','userTeam','company','userRole','phone','username'] }
+            #{crud.custom 'lastName'}
+                <a class="selectInfoView2" href="@{Users.show(object.id)}" oid="${object.id}" type="User" sid=2
+                   style="cursor: pointer">
+                ${object.lastName}</a>
+            #{/crud.custom}
+            #{crud.custom 'firstName'}
+                <a class="selectInfoView2" href="@{Users.show(object.id)}" oid="${object.id}" type="User" sid=2
+                   style="cursor: pointer">
+                ${object.firstName}</a>
+            #{/crud.custom}
+            #{crud.custom 'userPosition'}
+            ${object.userPosition?.name}
+            #{/crud.custom}
+            #{crud.custom 'userTeam'}
+            ${object.userTeam?.name}
+            #{/crud.custom}
+            #{crud.custom 'company'}
+            ${object.company}
+            #{/crud.custom}
+            #{crud.custom 'userRole'}
+            ${object.userRole.role}
+            #{/crud.custom}
+            #{crud.custom 'phone'}
+            ${object?.phone}
+            #{/crud.custom}
+            #{crud.custom 'username'}
+            ${object?.username}
+            #{/crud.custom}
+        #{/crud.table}
+            <div style="display:none">
+                <div id="showInfoUpdate">
+                </div>
+                <a id="showInfoUpdateA" href="#showInfoUpdate"></a>
+            </div>
+        </div>
+
+        <div id="crudListPagination">
+        #{crud.pagination /}
+        </div>
+
+
+    </div>
+
+</div>
+#{include "SharedView/SelectorInfoDialog2.html" /}
+<script type="text/javascript">
+    $("table td a.selectInfoView2").bind('mouseenter',
+            function () {
+                var aPos = $(this).offset(), ctTop = 0, ctLef = 0;
+                var sui = $("div#selector-info2");
+
+                ctTop = (aPos.top + 20);
+                ctLef = (aPos.left );
+
+                sui.css('top', ctTop + "px");
+                sui.css('left', ctLef + "px");
+                sui.show();
+                loadSelectorInfo2($(this).attr('oid'), $(this).attr('type'));
+
+            }).bind('mouseleave', function () {
+                $("div#selector-info2").hide();
+                cancelSelectorInfo2();
+            });
+</script>

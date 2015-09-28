@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js sidebar-large lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js sidebar-large lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js sidebar-large lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js sidebar-large"> <!--<![endif]-->
+
+<head>
+    <!-- BEGIN META SECTION -->
+    <meta charset="utf-8">
+    <title>CPMS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="" name="description"/>
+    <meta content="themes-lab" name="author"/>
+    <link rel="shortcut icon" href="/assets/img/favicon.png">
+    <!-- END META SECTION -->
+    <!-- BEGIN MANDATORY STYLE -->
+    <link href="/assets/css/icons/icons.min.css" rel="stylesheet">
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/public/stylesheets/main.css" rel="stylesheet">
+    <link href="/assets/css/plugins.min.css" rel="stylesheet">
+    <link href="/assets/css/style.min.css" rel="stylesheet">
+    <link href="#" rel="stylesheet" id="theme-color">
+    <!-- END  MANDATORY STYLE -->
+    <!-- END  MANDATORY STYLE -->
+    <script src="/assets/plugins/modernizr/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+    <script src="@{'/public/javascripts/jquery-2.1.3.js'}" type="text/javascript" charset="utf-8"></script>
+    <script>
+
+        var selectStyle = 0;
+        var selectThemeStyle = 0;
+    </script>
+#{get 'moreStyles' /}
+</head>
+
+<body data-page=#{get 'dataPage'/} class=#{get 'baseClass'/}>
+<!-- BEGIN TOP MENU -->
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#sidebar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a id="menu-medium" class="sidebar-toggle tooltips">
+                <i class="fa fa-outdent"></i>
+            </a>
+            <a class="navbar-brand" href="index.html"></a>
+        </div>
+        <div class="navbar-center">#{get 'title'/}</div>
+        <div class="navbar-collapse collapse">
+            <!-- BEGIN TOP NAVIGATION MENU -->
+            <ul class="nav navbar-nav pull-right header-menu">
+                <!-- BEGIN NOTIFICATION DROPDOWN -->
+                <li class="dropdown" id="notifications-header">
+                    <a ntype="0" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
+                       data-close-others="true">
+                        <i class="glyph-icon flaticon-notifications"></i>
+                        <span class="badge badge-danger badge-header"
+                              ncount=""></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-header clearfix">
+                            <p class="pull-left">Сонордуулга</p>
+                        </li>
+                        <li>
+                            <ul class="dropdown-menu-list withScroll" data-height="220"></ul>
+                        </li>
+                        <li class="dropdown-footer clearfix">
+                            <a href="#" class="pull-left">Бүх сонордуулгыг харах</a>
+                            <a href="#" class="pull-right">
+                                <i class="fa fa-cog"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <!-- END NOTIFICATION DROPDOWN -->
+                <!-- BEGIN MESSAGES DROPDOWN -->
+                <li class="dropdown" id="messages-header">
+                    <a ntype="1" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
+                       data-close-others="true">
+                        <i class="glyph-icon flaticon-email"></i>
+                        <span class="badge badge-primary badge-header"
+                              ncount=""></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-header clearfix">
+                            <p class="pull-left">Илгээмж</p>
+                        </li>
+                        <li class="dropdown-body">
+                            <ul class="dropdown-menu-list withScroll" data-height="220"></ul>
+                        </li>
+                        <li class="dropdown-footer clearfix">
+                            <a href="mailbox.html" class="pull-left">See all messages</a>
+                            <a href="#" class="pull-right">
+                                <i class="fa fa-cog"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <!-- END MESSAGES DROPDOWN -->
+                <!-- BEGIN USER DROPDOWN -->
+                <li class="dropdown" id="user-header">
+                    <a href="#" class="dropdown-toggle c-white" data-toggle="dropdown" data-hover="dropdown"
+                       data-close-others="true">
+                        <img src="/assets/img/avatars/avatar2.png" alt="user avatar" width="30" class="p-r-5">
+                        <span class="username">${user != null ? "asdasda" : "ERGEEG"}</span>
+                        <i class="fa fa-angle-down p-r-10"></i>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="">
+                                <i class="glyph-icon flaticon-calendar"></i>Aжлын хувиарь</a>
+                        </li>
+                        <li>
+                            <a href="">
+                                <i class="glyph-icon flaticon-account"></i> Миний тохиргоо
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/accountSettings/">
+                                <i class="glyph-icon flaticon-settings21"></i> Системийн тохиргоо
+                            </a>
+                        </li>
+                        <li class="dropdown-footer clearfix">
+                            <a href="javascript:;" class="toggle_fullscreen" title="Бүтэн дэлгэцээр харах">
+                                <i class="glyph-icon flaticon-fullscreen3"></i>
+                            </a>
+                            <a href="lockscreen.html" title="Систэм цоожлох">
+                                <i class="glyph-icon flaticon-padlock23"></i>
+                            </a>
+                            <a href="/logout" title="Гарах">
+                                <i class="fa fa-power-off"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <!-- END USER DROPDOWN -->
+
+                <!-- BEGIN CHAT HEADER -->
+                <li id="chat-header">
+                    <a href="#" class="c-white" id="chat-toggle">
+                        <i class="glyph-icon flaticon-speech76 f-24"></i>
+                        <span id="chat-notification" class="notification notification-danger hide"
+                              data-delay="2000"></span>
+                    </a>
+
+                    <div id="chat-popup" class="chat-popup hide" data-delay="2000">
+                        <div class="arrow-up"></div>
+                        <div class="chat-popup-inner bg-blue">
+                            <div>
+                                <div class="clearfix w-600">
+                                    <img src="/assets/img/avatars/avatar3.png" alt="avatar 3" width="30"
+                                         class="pull-left img-circle p-r-5">Админ
+                                </div>
+                                <div class="message m-t-5">Сайн байна уу?</div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <!-- END CHAT HEADER -->
+            </ul>
+            <!-- END TOP NAVIGATION MENU -->
+        </div>
+    </div>
+</nav>
+<!-- END TOP MENU -->
+<!-- BEGIN WRAPPER -->
+<div id="wrapper">
+    <!-- BEGIN MAIN SIDEBAR -->
+    <nav id="sidebar">
+        <div id="main-menu">
+            <ul class="sidebar-nav">
+                <li class="${activeMenu == 'RFI'?'active current hasSub':''}">
+                    <a href="#"><i class="fa fa-exchange"></i><span
+                            class="sidebar-text">&{'RFI'}</span>
+                        <span class="fa arrow"></span></a>
+                    <ul class="submenu collapse ${activeMenu == 'RFI'?'in':''}">
+                        <li class="${activeMenuSub == 'RFIlist'?'active current':''}">
+                            <a href="@{controllers.RFIs.viewAll()}"><span class="sidebar-text">&{'List'}</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'RFInew'?'active current':''}">
+                            <a href="@{controllers.RFIs.blank(0, 0,"","","", null)}"><span
+                                    class="sidebar-text">&{'CreateNew'}</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'RFIdocs'?'active current':''}">
+                            <a href="@{controllers.RFIs.viewDocList()}"><span class="sidebar-text">&{'Documents'}</span></a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="${activeMenu == 'PunchList'?'active current hasSub':''}">
+                    <a href="#"><i class="fa fa-list-ol"></i><span
+                            class="sidebar-text">&{'PunchList'}</span>
+                        <span class="fa arrow"></span></a>
+                    <ul class="submenu collapse ${activeMenu == 'PunchList'?'in':''}">
+                        <li class="${activeMenuSub == 'PunchListlist'?'active current':''}">
+                            <a href="@{controllers.PunchLists.viewAll()}"><span
+                                    class="sidebar-text">&{'List'}</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'PunchListnew'?'active current':''}">
+                            <a href="@{controllers.PunchLists.blank(0, 0,"","","", null)}"><span
+                                    class="sidebar-text">&{'CreateNew'}</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'PunchListdocs'?'active current':''}">
+                            <a href="@{controllers.PunchLists.viewDocList()}"><span
+                                    class="sidebar-text">&{'Documents'}</span></a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="${activeMenu == 'Drawing'?'active current':''}">
+                    <a href="@{controllers.Drawings.home()}"><i class="glyph-icon flaticon-ui-elements2"></i>
+                        <span
+                                class="sidebar-text">&{'Drawing'}</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="footer-widget">
+            <div class="footer-gradient"></div>
+            <div id="sidebar-charts">
+                <div class="sidebar-charts-inner">
+                    <div class="sidebar-charts-left">
+                        <div class="sidebar-chart-title">Мэдээлэл</div>
+                        <div class="sidebar-chart-number">1,256</div>
+                    </div>
+                    <div class="sidebar-charts-right" data-type="bar" data-color="theme">
+                        <span class="dynamicbar1"></span>
+                    </div>
+                </div>
+                <hr class="divider">
+                <div class="sidebar-charts-inner">
+                    <div class="sidebar-charts-left">
+                        <div class="sidebar-chart-title">Мэдээлэл</div>
+                        <div class="sidebar-chart-number">47,564₮</div>
+                    </div>
+                    <div class="sidebar-charts-right" data-type="bar" data-color="theme">
+                        <span class="dynamicbar2"></span>
+                    </div>
+                </div>
+                <hr class="divider">
+                <div class="sidebar-charts-inner">
+                    <div class="sidebar-charts-left">
+                        <div class="sidebar-chart-title">Мэдээлэл</div>
+                        <div class="sidebar-chart-number" id="number-visits">147,687</div>
+                    </div>
+                    <div class="sidebar-charts-right" data-type="bar" data-color="theme">
+                        <span class="dynamicbar3"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-footer clearfix">
+                <a class="pull-left" href="profil_edit.html" data-rel="tooltip" data-placement="top"
+                   data-original-title="Settings"><i class="glyph-icon flaticon-settings21"></i></a>
+                <a class="pull-left toggle_fullscreen" href="#" data-rel="tooltip" data-placement="top"
+                   data-original-title="Fullscreen"><i class="glyph-icon flaticon-fullscreen3"></i></a>
+                <a class="pull-left" href="lockscreen.html" data-rel="tooltip" data-placement="top"
+                   data-original-title="Lockscreen"><i class="glyph-icon flaticon-padlock23"></i></a>
+                <a class="pull-left" href="/logout" data-rel="tooltip" data-placement="top"
+                   data-original-title="Logout"><i class="fa fa-power-off"></i></a>
+            </div>
+        </div>
+    </nav>
+    <!-- END MAIN SIDEBAR -->
+    <!-- BEGIN MAIN CONTENT -->
+#{doLayout /}
+#{if flash.success}
+
+#{/if}
+#{if flash.error || error}
+
+#{/if}
+    <!-- END MAIN CONTENT -->
+</div>
+<!-- END WRAPPER -->
+<!-- BEGIN CHAT MENU -->
+<nav id="menu-right">
+    <ul>
+        <li class="mm-label label-big">СИСТЭМД НЭВТЭРСЭН</li>
+        <li class="img no-arrow have-message">
+                <span class="inside-chat">
+                    <i class="online"></i>
+                    <img src="/assets/img/avatars/avatar3.png" alt="avatar 3"/>
+                    <span class="chat-name">Хэрэглэгч 1</span>
+                    <span class="pull-right badge badge-danger hide">3</span>
+                    <span>Албан тушаал</span>
+                </span>
+            <ul class="chat-messages">
+                <li class="img">
+                        <span>
+                            <span class="chat-detail">
+                                <img src="/assets/img/avatars/avatar3.png" alt="avatar 3"/>
+                                <span class="chat-bubble"><span class="bubble-inner">Өглөөний мэнд!</span></span>
+                            </span>
+                        </span>
+                </li>
+                <li class="img">
+                        <span>
+                            <span class="chat-detail">
+                                <img src="/assets/img/avatars/avatar3.png" alt="avatar 3"/>
+                                <span class="chat-bubble"><span class="bubble-inner">Байна уу?</span></span>
+                            </span>
+                        </span>
+                </li>
+                <li class="img">
+                        <span>
+                            <span class="chat-detail">
+                                <img src="/assets/img/avatars/avatar3.png" alt="avatar 3"/>
+                                <span class="chat-bubble">
+                                    <span class="bubble-inner">Та хэзээ буцаж ирэх вэ?</span>
+                                </span>
+                            </span>
+                        </span>
+                </li>
+                <li>
+                        <span class="chat-input">
+                            <input type="text" class="form-control send-message" placeholder="Мессеж бичих"/>
+                        </span>
+                </li>
+            </ul>
+        </li>
+        <li class="img no-arrow">
+                <span class="inside-chat">
+                    <i class="online"></i>
+                    <img src="/assets/img/avatars/avatar2.png" alt="avatar 2"/>
+                    <span class="chat-name">Хэрэглэгч 2</span>
+                    <span>Албан тушаал</span>
+                </span>
+            <ul class="chat-messages">
+                <li>
+                        <span class="chat-input">
+                            <input type="text" class="form-control send-message" placeholder="Мессеж бичих"/>
+                        </span>
+                </li>
+            </ul>
+        </li>
+        <li class="img no-arrow">
+                <span class="inside-chat">
+                    <i class="busy"></i>
+                    <img src="/assets/img/avatars/avatar13.png" alt="avatar 13"/>
+                    <span class="chat-name">Хэрэглэгч 3</span>
+                    <span>Албан тушаал</span>
+                </span>
+            <ul class="chat-messages">
+                <li>
+                        <span class="chat-input">
+                            <input type="text" class="form-control send-message" placeholder="Мессеж бичих"/>
+                        </span>
+                </li>
+            </ul>
+        </li>
+        <li class="img no-arrow">
+                <span class="inside-chat">
+                    <i class="away"></i>
+                    <img src="/assets/img/avatars/avatar4.png" alt="avatar 4"/>
+                    <span class="chat-name">Хэрэглэгч 4</span>
+                    <span>Албан тушаал</span>
+                </span>
+            <ul class="chat-messages">
+                <li>
+                        <span class="chat-input">
+                            <input type="text" class="form-control send-message" placeholder="Мессеж бичих"/>
+                        </span>
+                </li>
+            </ul>
+        </li>
+        <li class="img no-arrow">
+                <span class="inside-chat">
+                    <i class="online"></i>
+                    <img src="/assets/img/avatars/avatar5.png" alt="avatar 5"/>
+                    <span class="chat-name">Хэрэглэгч 5</span>
+                    <span>Албан тушаал</span>
+                </span>
+            <ul class="chat-messages">
+                <li>
+                        <span class="chat-input">
+                            <input type="text" class="form-control send-message" placeholder="Мессеж бичих"/>
+                        </span>
+                </li>
+            </ul>
+        </li>
+        <li class="mm-label label-big m-t-30">СИСТЭМД НЭВТРЭЭГҮЙ</li>
+
+        <li class="img no-arrow">
+                <span class="inside-chat">
+                    <i class="offline"></i>
+                    <img src="/assets/img/avatars/avatar6.png" alt="avatar 6"/>
+                    <span class="chat-name">Хэрэглэгч 6</span>
+                    <span>Албан тушаал</span>
+                </span>
+            <ul class="chat-messages">
+                <li>
+                        <span class="chat-input">
+                            <input type="text" class="form-control send-message" placeholder="Мессеж бичих"/>
+                        </span>
+                </li>
+            </ul>
+        </li>
+        <li class="img no-arrow">
+                <span class="inside-chat">
+                    <i class="offline"></i>
+                    <img src="/assets/img/avatars/avatar7.png" alt="avatar 7"/>
+                    <span class="chat-name">Хэрэглэгч 7</span>
+                    <span>Албан тушаал</span>
+                </span>
+            <ul class="chat-messages">
+                <li>
+                        <span class="chat-input">
+                            <input type="text" class="form-control send-message" placeholder="Мессеж бичих"/>
+                        </span>
+                </li>
+            </ul>
+        </li>
+        <li class="img no-arrow">
+                <span class="inside-chat">
+                    <i class="offline"></i>
+                    <img src="/assets/img/avatars/avatar8.png" alt="avatar 8"/>
+                    <span class="chat-name">Хэрэглэгч 8</span>
+                    <span>Албан тушаал</span>
+                </span>
+            <ul class="chat-messages">
+                <li>
+                        <span class="chat-input">
+                            <input type="text" class="form-control send-message" placeholder="Мессеж бичих"/>
+                        </span>
+                </li>
+            </ul>
+        </li>
+        <li class="img no-arrow">
+                <span class="inside-chat">
+                        <i class="offline"></i>
+                        <img src="/assets/img/avatars/avatar9.png" alt="avatar 9"/>
+                        <span class="chat-name">Хэрэглэгч 9</span>
+                        <span>Албан тушаал</span>
+                    </span>
+            <ul class="chat-messages">
+                <li>
+                        <span class="chat-input">
+                            <input type="text" class="form-control send-message" placeholder="Мессеж бичих"/>
+                        </span>
+                </li>
+            </ul>
+        </li>
+        <li class="img no-arrow">
+                <span class="inside-chat">
+                    <i class="offline"></i>
+                    <img src="/assets/img/avatars/avatar12.png" alt="avatar 12"/>
+                    <span class="chat-name">Хэрэглэгч 10</span>
+                    <span>Албан тушаал</span>
+                </span>
+            <ul class="chat-messages">
+                <li>
+                        <span class="chat-input">
+                            <input type="text" class="form-control send-message" placeholder="Мессеж бичих"/>
+                        </span>
+                </li>
+            </ul>
+        </li>
+        <li class="img no-arrow">
+                <span class="inside-chat">
+                    <i class="offline"></i>
+                    <img src="/assets/img/avatars/avatar11.png" alt="avatar 11"/>
+                    <span class="chat-name">Хэрэглэгч 12</span>
+                    <span>Албан тушаал</span>
+                </span>
+            <ul class="chat-messages">
+                <li>
+                        <span class="chat-input">
+                            <input type="text" class="form-control send-message" placeholder="Мессеж бичих"/>
+                        </span>
+                </li>
+            </ul>
+        </li>
+        <li class="img no-arrow">
+                <span class="inside-chat">
+                    <i class="offline"></i>
+                    <img src="/assets/img/avatars/avatar10.png" alt="avatar 10"/>
+                    <span class="chat-name">Хэрэглэгч 13</span>
+                    <span>Албан тушаал</span>
+                </span>
+            <ul class="chat-messages">
+                <li>
+                        <span class="chat-input">
+                            <input type="text" class="form-control send-message" placeholder="Мессеж бичих"/>
+                        </span>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+<!-- END CHAT MENU -->
+<!-- BEGIN PAGE LEVEL SCRIPTS -->
+#{get 'moreScripts' /}
+<script src="/assets/plugins/jnotify/jNotify.jquery.min.js"></script>
+
+<!-- END  PAGE LEVEL SCRIPTS -->
+<script src="/assets/js/application.js"></script>
+<script type="text/javascript">
+
+    function loading1(vals) {
+        $(vals).html("<div id=loadingImg><img src='/public/images/ajax-horizontal.gif' alt='Loading'/></div>");
+    }
+    function loading2(vals) {
+        $(vals).html("<div id=loadingImg><img src='/public/images/loading.gif' alt='Loading'/></div>");
+    }
+</script>
+
+</body>
+</html>

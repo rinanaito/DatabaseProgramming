@@ -1,0 +1,128 @@
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("div#shareDivSelectUser").dialog({
+            autoOpen: false,
+            height: 480,
+            width: 300,
+            modal: false,
+            zIndex: 1104,
+            title: "Хүн, Баг сонгох"
+        });
+        $('div#selectSentSelected').css('top', (screen.height / 2) - 220);
+        $('div#selectSentSelected').css('left', (screen.width / 2) + 158);
+    });
+    function selectSentChechbox(id) {
+        var idc = 1;
+        $('div#selectSentUserDiv table#selectSentTable input').each(function () {
+            if (idc != id)$(this).removeAttr('checked');
+            else $(this).attr('checked', 'checked');
+            idc++;
+        });
+        if (id == 3) {
+            $('div#selectSentUserDiv input#selectSentTeamBy').removeClass('hidden');
+            $('div#selectSentUserDiv input#selectSentTeamBy').val('нэрээр нь хайх');
+        }
+        else  $('div#selectSentUserDiv input#selectSentTeamBy').addClass('hidden');
+        if (id == 2)sentByTeam();
+        else $('div#selectSentUserDiv div#datas').html("");
+        if (id == 1) {
+            $('div#selectSentSelected').addClass('dhidden');
+            $('div#selectSentUserDiv div#datas').css('height', '40px');
+            $('div#selectSentSelected ul').html("");
+        }
+        else {
+            $('div#selectSentSelected').removeClass('dhidden');
+            $('div#selectSentUserDiv div#datas').css('height', '350px')
+        }
+
+    }
+    var sentUserByTeamAction = #{jsAction @FunctionController.sentUserByTeam() /};
+    var sentUserByPersonAction = #{jsAction @FunctionController.sentUserByPerson(":search") /};
+    function sentByTeam() {
+        loading2('div#selectSentUserDiv div#datas');
+        $.post(sentUserByTeamAction(), function (data) {
+            $('div#selectSentUserDiv div#datas').html(data);
+        });
+    }
+    function sentByPerson() {
+        loading2('div#selectSentUserDiv div#datas');
+        $.post(sentUserByPersonAction({search: $('div#selectSentUserDiv input#selectSentTeamBy').val()}), function (data) {
+            $('div#selectSentUserDiv div#datas').html(data);
+        });
+    }
+    function sentByPersonClear() {
+        $('div#selectSentUserDiv input#selectSentTeamBy').val("");
+    }
+    function selectSentUserLi(selId, selType) {
+        $('div#selectSentSelected ul li').each(function () {
+            if ($(this).attr('id') == selId &&
+                    $(this).attr('type') == selType)selId = 0;
+        });
+        if (selId != 0)
+            $('div#selectSentSelected ul').append("<li id=" + selType + "-" + selId +
+            " onclick=selectSentUserLiRemove(" + selId + ",'" + selType + "')>" +
+            $('div#selectSentUserDiv div#datas li#' + selType + '-' + selId).html() + "</li>");
+        else alert("Аль хэдийн сонгогдсон байна!")
+    }
+    function selectSentUserLiRemove(selId, selType) {
+        $('div#selectSentSelected li#' + selType + '-' + selId).remove();
+    }
+</script>
+<style type="text/css">
+    div#selectSentUserDiv {
+        font-size: 12px;
+        -moz-user-select: none;
+    }
+
+    div#selectSentSelected {
+        background-color: #ffffff;
+        width: 300px;
+        height: auto;
+        border: 1px #808080 solid;
+        border-radius: 4px;
+    }
+
+    div#selectSentUserDiv input.hidden {
+        display: none;
+    }
+
+    div.dhidden {
+        display: none;
+    }
+
+    div#selectSentUserDiv div#tools input {
+        width: 80px;
+        height: 20px;
+    }
+
+    div#selectSentUserDiv div#datas li:hover,
+    div#selectSentSelected li:hover {
+        background: #e3e3e3;
+    }
+
+    div#selectSentUserDiv div#datas li,
+    div#selectSentSelected li {
+        width: 100%;
+        border-top: 1px solid #d3d3d3;
+        position: relative;
+        display: inline-block;
+        font-family: helvetica, arial, serif !important;
+        border-radius: 3px;
+        line-height: 21px;
+        padding-left: 5px;
+        cursor: pointer;
+    }
+
+    div#selectSentUserDiv div#datas ul,
+    div#selectSentSelected ul {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        width: 98%;
+    }
+
+    div#selectSentUserDiv div#datas li div,
+    div#selectSentSelected li div {
+        font-size: 12px;
+    }
+</style>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <title></title>
+</head>
+<body>
+<svg id="svg" xmlns="http://www.w3.org/2000/svg" version="1.1"
+     viewBox="0 0 400 200">
+    <g id="outer_group" style="stroke-width: 1.5px;">
+        <line x1="0" x2="100" y1="50" y2="50"></line>
+        <line x1="50" x2="50" y1="0" y2="100"></line>
+        <polygon class="sector" points="10,20 20,20 20,30 10,30"></polygon>
+        <polygon class="sector" points="70,80 80,80 80,90 70,90"></polygon>
+    </g>
+</svg>
+<button id="hand">Hand</button>
+<button id="pen">Pen</button>
+</body>
+<script>
+    var edit = true;
+    var _type = "Path";
+    var _color = "#000000";
+    var _opacity = 1.0;
+    var _width = 5;
+    var _offset = null;
+    var _drawing = false;
+    var _c = null;
+    var _points = [];
+    var circleStart = [];
+    function editing(mode) {
+        if (edit == true) {
+            if (mode == "erase") {
+                // Cursor is crosshair, so it looks like we can do something.
+                $("svg").css("cursor", "crosshair");
+                $("svg").unbind("mousedown", _mousedown);
+                $("svg").unbind("mousemove", _mousemove);
+                $("svg").unbind("mouseup", _mouseup);
+                $(document).unbind("mouseup", _mouseup);
+            } else {
+                $("svg").css("cursor", "crosshair");
+                $("svg").mousedown(_mousedown);
+                $("svg").mousemove(_mousemove);
+                $("svg").mouseup(_mouseup);
+                $(document).mouseup(_mouseup);
+            }
+        } else {
+            $("svg").attr("style", "cursor:default");
+            $("svg").unbind("mousedown", _mousedown);
+            $("svg").unbind("mousemove", _mousemove);
+            $("svg").unbind("mouseup", _mouseup);
+            $(document).unbind("mouseup", _mouseup);
+        }
+    }
+    function _mousedown(e) {
+//        _disable_user_select();
+        if (_type == "Text") {
+//            var _offset = $(self.container()).offset();
+//            var x = e.pageX - _offset.left,
+//                    y = e.pageY - _offset.top;
+//            var t = _paper.text(x, y, "asfsf");
+//            t.attr({fill: _pen.getColor(), 'font-size': '72px'});
+//            var stroke = t.attr();
+//            stroke.type = t.type;
+//            _action_history.add({
+//                type: "stroke",
+//                stroke: stroke
+//            });
+        } else
+            start(e, self);
+    }
+
+    function _mousemove(e) {
+        if (_type != "Text") {
+            move(e);
+        }
+    }
+
+    function _mouseup(e) {
+////        _enable_user_select();
+        var path = finisher(e);
+//
+//        if (path != null) {
+//            // Add event when clicked.
+//            path.click(_pathclick);
+//
+//            // Save the stroke.
+//            var stroke = path.attr();
+//            stroke.type = path.type;
+//
+//            //_strokes.push(stroke);
+//
+//            _action_history.add({
+//                type: "stroke",
+//                stroke: stroke
+//            });
+//        }
+    }
+
+    function start(e) {
+        _drawing = true;
+
+        var _offset = $("svg").offset();
+
+        var x = e.pageX - _offset.left,
+                y = e.pageY - _offset.top;
+        _points.push([x, y]);
+        if (_type == "Circle")
+            circleStart = [x, y];
+        if (_type == "Pin") {
+            _points.push([x + 3, y + 3]);
+//            _c = sketchpad.paper().path();
+//            _c.attr({
+//                stroke: _color,
+//                "stroke-opacity": _opacity,
+//                "stroke-width": _width,
+//                "stroke-linecap": "round",
+//                "stroke-linejoin": "round"
+//            });
+        } else {
+//            _c = sketchpad.paper().path();
+//
+//            _c.attr({
+//                stroke: _color,
+//                "stroke-opacity": _opacity,
+//                "stroke-width": _width,
+//                "stroke-linecap": "round",
+//                "stroke-linejoin": "round"
+//            });
+        }
+
+    }
+
+    function finisher(e) {
+        var path = null;
+
+        if (_c != null) {
+            if (_points.length <= 1) {
+                _c.remove();
+            } else {
+                path = _c;
+            }
+        }
+
+        _drawing = false;
+        _c = null;
+        _points = [];
+
+        return path;
+    }
+
+    function move(e) {
+        if (_drawing == true) {
+            if (_type == "Path") {
+                var x = e.pageX - _offset.left,
+                        y = e.pageY - _offset.top;
+                _points.push([x, y]);
+//                _c.attr({path: points_to_svg()});
+            }
+            if (_type == "Rectangle") {
+                var x = e.pageX - _offset.left,
+                        y = e.pageY - _offset.top;
+                var start = _points[0];
+                _points = [];
+                _points.push(start);
+                _points.push([start[0], y]);
+                _points.push([x, y]);
+                _points.push([x, start[1]]);
+                _points.push(start);
+//                _c.attr({path: points_to_svg()});
+            }
+            if (_type == "Circle") {
+                var x = e.pageX - _offset.left,
+                        y = e.pageY - _offset.top;
+                _points = [];
+                var a = 0, b = 0;
+                if (circleStart[0] > x) {
+                    a = (circleStart[0] - x) / 2;
+                    if (circleStart[1] > y) b = (circleStart[1] - y) / 2;
+                    else b = (y - circleStart[1]) / 2;
+                } else {
+                    a = (x - circleStart[0]) / 2;
+                    if (circleStart[1] > y) b = (circleStart[1] - y) / 2;
+                    else b = (y - circleStart[1]) / 2;
+                }
+                var xx = 0, yy = 0;
+                for (var angle = 0; angle <= 360; angle += 3) {
+                    xx = a * Math.cos(angle * Math.PI / 180) + (circleStart[0] + x) / 2;
+                    yy = b * Math.sin(angle * Math.PI / 180) + (circleStart[1] + y) / 2;
+                    _points.push([xx, yy]);
+                }
+//                _c.attr({path: points_to_svg()});
+            }
+            if (_type == "Line") {
+                var x = e.pageX - _offset.left,
+                        y = e.pageY - _offset.top;
+                _points.pop();
+                _points.push([x, y]);
+//                _c.attr({path: points_to_svg()});
+            }
+            if (_type == "Arrow1") {
+                var x = e.pageX - _offset.left,
+                        y = e.pageY - _offset.top;
+                var start = _points[0];
+                _points = [];
+                _points.push(start);
+                _points.push([x, y]);
+                var D = Math.sqrt((x - start[0]) * (x - start[0]) + (y - start[1]) * (y - start[1]));
+                if (D > _width * 3) {
+                    var angle = 20 * Math.PI / 180;
+                    var lineangle = Math.atan2(y - start[1], x - start[0]);
+                    var h = Math.abs(_width * 2 / Math.cos(angle));
+                    var angle1 = lineangle + Math.PI + angle;
+                    var topx = x + Math.cos(angle1) * h;
+                    var topy = y + Math.sin(angle1) * h;
+                    var angle2 = lineangle + Math.PI - angle;
+                    var botx = x + Math.cos(angle2) * h;
+                    var boty = y + Math.sin(angle2) * h;
+                    _points.push([topx, topy]);
+                    _points.push([botx, boty]);
+                    _points.push([x, y]);
+                }
+//                _c.attr({path: points_to_svg()});
+            }
+            if (_type == "Arrow2") {
+                var x = e.pageX - _offset.left,
+                        y = e.pageY - _offset.top;
+                var start = _points[0];
+                _points = [];
+                _points.push(start);
+                _points.push([x, y]);
+                var D = Math.sqrt((x - start[0]) * (x - start[0]) + (y - start[1]) * (y - start[1]));
+                if (D > _width * 5) {
+                    _points.pop();
+                    var angle = 20 * Math.PI / 180;
+                    var lineangle = Math.atan2(start[1] - y, start[0] - x);
+                    var h = Math.abs(_width * 2 / Math.cos(angle));
+                    var angle1 = lineangle + Math.PI + angle;
+                    var topx = start[0] + Math.cos(angle1) * h;
+                    var topy = start[1] + Math.sin(angle1) * h;
+                    var angle2 = lineangle + Math.PI - angle;
+                    var botx = start[0] + Math.cos(angle2) * h;
+                    var boty = start[1] + Math.sin(angle2) * h;
+                    _points.push([topx, topy]);
+                    _points.push([botx, boty]);
+                    _points.push(start);
+                    _points.push([x, y]);
+
+                    lineangle = Math.atan2(y - start[1], x - start[0]);
+                    angle1 = lineangle + Math.PI + angle;
+                    topx = x + Math.cos(angle1) * h;
+                    topy = y + Math.sin(angle1) * h;
+                    angle2 = lineangle + Math.PI - angle;
+                    botx = x + Math.cos(angle2) * h;
+                    boty = y + Math.sin(angle2) * h;
+                    _points.push([topx, topy]);
+                    _points.push([botx, boty]);
+                    _points.push([x, y]);
+                }
+//                _c.attr({path: points_to_svg()});
+            }
+        }
+    }
+
+    function points_to_svg() {
+        if (_points != null && _points.length > 1) {
+            var p = _points[0];
+            var path = "M" + p[0] + "," + p[1];
+            for (var i = 1, n = _points.length; i < n; i++) {
+                p = _points[i];
+                path += "L" + p[0] + "," + p[1];
+            }
+            return path;
+        } else {
+            return "";
+        }
+    }
+</script>
+<script>
+    var svg = d3.select("#svg");
+    var svg_group = d3.select('#outer_group');
+
+    var zoom = d3.behavior.zoom()
+            .translate([0, 0])
+            .scale(1)
+            .scaleExtent([.5, 20])
+            .on("zoom", zoomed);
+    var editing = true;
+    var no_zoom = d3.behavior.zoom();
+    $("button#hand").click(function () {
+        svg.call(zoom);
+        editing = false;
+    });
+    $("button#pen").click(function () {
+        svg.call(no_zoom);
+        editing = true;
+    });
+
+    function zoomed() {
+        svg_group.style("stroke-width", 1.5 / d3.event.scale + "px");
+        svg_group.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    }
+</script>
+<style>
+    svg {
+        width: 800px;
+        height: 400px;
+        outline: 1px solid black;
+
+    }
+
+    .sector {
+        fill: blue;
+        cursor: pointer;
+    }
+
+    .sector:hover {
+        fill: red;
+    }
+
+    #outer_group {
+        outline: 1px solid blue;
+        background-color: blue !important;
+    }
+
+    line {
+        stroke-width: 1px;
+        stroke: yellow;
+    }
+</style>
+</html>
