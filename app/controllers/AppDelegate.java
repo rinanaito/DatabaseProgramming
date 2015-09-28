@@ -19,6 +19,11 @@ import java.util.List;
 /**
  * Created by enkhamgalan on 4/5/15.
  */
+
+/**
+    goo.gl/B4oAVK
+    goo.gl/BK4k1J
+   */
 public class AppDelegate extends Controller {
     public static void login(String body) {
 //        JsonObject json = (JsonObject) new JsonParser().parse(params.get("body"));
